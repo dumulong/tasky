@@ -162,10 +162,12 @@ function closeLSData() {
 }
 
 function openLSData() {
-    tasksListDiv.classList.add("hidden");
-    logsDiv.classList.add("hidden");
+    document.querySelector("#tasksList").classList.add("hidden");
+    document.querySelector(".logs").classList.add("hidden");
     document.querySelector(".add-task-div").classList.add("hidden");
     document.querySelector(".add-log-div").classList.add("hidden");
+    document.querySelector(".ls-data-open").classList.add("hidden");
+
     document.querySelector(".ls-data").classList.remove("hidden");
 }
 

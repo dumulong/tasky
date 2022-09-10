@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Monthly</title>
+<title>Tasky</title>
 
 <meta name="author" content="Denis Dumulong">
 <meta name="description" content="">
@@ -34,13 +34,16 @@
         </div>
     </div>
     <div class="logs"></div>
-    <div class="ls-data">
-        <textarea id="lsData" name="lsData" rows="10" />
+    <div class="ls-data hidden">
+        <textarea id="lsData" name="lsData" rows="10"></textarea>
         <div class=""raw-data-buttons>
             <button id="btnGetLS" onclick="getLSData()">Get Local Storage</button>
             <button id="btnClose" onclick="closeLSData()">Close</button>
             <button id="btnSetLS" onclick="setLSData()">Set Local Storage</button>
         </div>
+    </div>
+    <div class="ls-data-open" onclick="openLSData()">
+        <a id="openLSData">Show/Set Local Storage</a>
     </div>
 </div>
 
