@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Monthly</title>
+
+<meta name="author" content="Denis Dumulong">
+<meta name="description" content="">
+<meta name="keywords" content="">
+
+<link rel="stylesheet" href="tasky.css" type="text/css">
+<link rel="apple-touch-icon" href="./tasky.png" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+    <div class="well">
+        <div id="task"></div>
+        <div id="tasksList"></div>
+        <div class="add-task-div hidden">
+            Please click on the plus sign to add a task.
+        </div>
+        <div class="add-log-div">
+            <input name="selectDate" id="selectDate" value="" />
+            <button name="btnAddLog" id="btnAddLog" onclick="addLogDate ()">Add</button>
+        </div>
+    </div>
+    <div class="logs"></div>
+    <div class="ls-data">
+        <textarea id="lsData" name="lsData" rows="10" />
+        <div class=""raw-data-buttons>
+            <button id="btnGetLS" onclick="getLSData()">Get Local Storage</button>
+            <button id="btnClose" onclick="closeLSData()">Close</button>
+            <button id="btnSetLS" onclick="setLSData()">Set Local Storage</button>
+        </div>
+    </div>
+</div>
+
+<script id="log-template" type="text/template">
+    <div class="log">
+        <div class="log-date">{logDateLabel}</div>
+        <i data-value="{logDate}" class="delete-icon">&#128465;</i>
+    </div>
+</script>
+
+<script src="tasky.js"></script>
+
+<script>
+    loadPage ();
+</script>
+
+</body>
+</html>
