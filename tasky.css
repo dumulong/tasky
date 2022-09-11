@@ -81,7 +81,6 @@ i {
 #task {
     font-weight: bold;
     font-size: 2.2em;
-    margin-bottom: 10px;
     color:#0d6efd;
 }
 
@@ -104,6 +103,10 @@ i {
     flex-flow: row wrap;
     align-items: center;
     margin-bottom: 0.4rem;
+}
+
+.delta-last {
+    margin-bottom: 1rem;
 }
 
 .delete-icon {

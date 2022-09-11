@@ -81,7 +81,33 @@ function showLogs(){
             return logTemplate.supplant({logDate: x, logDateLabel});
         })
         document.querySelector (".logs").innerHTML = dateList.join("");
+
+        if (dates.length > 0) {
+            const lastDate = moment(dates[0],"YYYYMMDD");
+            const deltaLast = `Last completed: ${calcDeltaDate(lastDate)}`;
+            document.querySelector (".delta-last").innerHTML = deltaLast;
+        }
+
     }
+}
+
+function calcDeltaDate (dateStamp) {
+    var a = moment();
+    var b = moment(dateStamp);
+
+    var years = a.diff(b, 'year');
+    b.add(years, 'years');
+
+    var months = a.diff(b, 'months');
+    b.add(months, 'months');
+
+    var days = a.diff(b, 'days');
+
+    let diff = (years ? `${years} year${years === 1 ? "" : "s"} ` : "");
+    diff += (months ? `${months} month${months === 1 ? "" : "s"} ` : "");
+    diff += (days ? `${days} day${days === 1 ? "" : "s"}` : "");
+
+    return (diff ? `${diff} ago` : "Today");
 }
 
 function addLogDate () {
