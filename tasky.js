@@ -51,10 +51,10 @@ function readLocalStorage (searchQueryTask) {
         tasks.push(searchQueryTask);
     }
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-    tasks.push(addTaskSymbol);
 
     //Generate the links
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
+    links.push(`<div class="task-link add-task-symbol">${addTaskSymbol}</div>`);
 
     //Add them to the list
     const separatorTemplate = '<span class="task-split">|</span>'
