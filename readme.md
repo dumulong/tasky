@@ -18,7 +18,7 @@ It was more of a reminder to be honest... I already had the solution in mind.  I
 
 An added benefit was that nobody else could access and corrupt my data.  It was to be just accessible, from the web, but each person would have their own private "database".
 
-I provide you the tool, you use it by plugging your own private data. The data are secure and private but, sadly temporary and device-bound.  Anybody clearing their localStorage or changing device would lose the data.
+I provide you the tool, you use it by plugging your own private data. The data are secure and private but, sadly temporary and device-bound.  Anybody clearing their localStorage or changing device would lose the data. You can always get access to the data for backing them up or making manual change by clicking on the bottom link "Show/Set Local Storage".
 
 So, here it is, a full html/css/javascript solution without using any external package or files. The least amount of tech possible to avoid future fuss about upgrading etc.
 

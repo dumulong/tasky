@@ -21,7 +21,7 @@
 
 <body>
 
-<div class="container">
+<div class="main container">
     <div class="well">
         <div id="task"></div>
         <div id="tasksList"></div>
@@ -34,16 +34,16 @@
         </div>
     </div>
     <div class="logs"></div>
-    <div class="ls-data hidden">
-        <textarea id="lsData" name="lsData" rows="10"></textarea>
-        <div class=""raw-data-buttons>
-            <button id="btnGetLS" onclick="getLSData()">Get Local Storage</button>
-            <button id="btnClose" onclick="closeLSData()">Close</button>
-            <button id="btnSetLS" onclick="setLSData()">Set Local Storage</button>
-        </div>
-    </div>
-    <div class="ls-data-open" onclick="openLSData()">
+    <div class="show-admin" onclick="openLSData()">
         <a id="openLSData">Show/Set Local Storage</a>
+    </div>
+</div>
+
+<div class="admin hidden">
+    <textarea id="lsData" name="lsData" rows="10"></textarea>
+    <div class="raw-data-buttons">
+        <button id="btnSetLS" onclick="setLSData()">Set Local Storage</button>
+        <button id="btnClose" onclick="closeLSData()">Close</button>
     </div>
 </div>
 

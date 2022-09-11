@@ -154,7 +154,7 @@ function getLSData() {
 }
 
 function setLSData() {
-    localStorage.getItem("Tasky", JSON.stringify(lsDataTextarea.value));
+    localStorage.setItem("Tasky", lsDataTextarea.value);
 }
 
 function closeLSData() {
@@ -162,13 +162,9 @@ function closeLSData() {
 }
 
 function openLSData() {
-    document.querySelector("#tasksList").classList.add("hidden");
-    document.querySelector(".logs").classList.add("hidden");
-    document.querySelector(".add-task-div").classList.add("hidden");
-    document.querySelector(".add-log-div").classList.add("hidden");
-    document.querySelector(".ls-data-open").classList.add("hidden");
-
-    document.querySelector(".ls-data").classList.remove("hidden");
+    document.querySelector(".main").classList.add("hidden");
+    document.querySelector(".admin").classList.remove("hidden");
+    getLSData();
 }
 
 // Helper function
