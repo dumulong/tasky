@@ -1,34 +1,42 @@
 const unknownTask = "Unknown";
-const taskPlus = "\u2795";
+const addTaskSymbol = "\u2795";
 
 // Define the main variables
-let data = []; // Main structure for the schedule
+let data = []; // The local storage data
 let tasks = []; // List of tasks
-
-// The current task
-const searchTask = (location.search ? decodeURI(location.search.substring(1)) : "");
-let currentTask = (searchTask ? searchTask : unknownTask);
-document.querySelector ("#task").innerHTML = currentTask;
-if (currentTask === unknownTask) {
-    document.querySelector(".add-task-help").classList.remove("hidden");
-    document.querySelector(".add-date-div").classList.add("hidden");
-} else {
-    document.querySelector(".add-task-help").classList.add("hidden");
-    document.querySelector(".add-date-div").classList.remove("hidden");
-}
-
-// Set the default value for the input
-document.querySelector("#selectDate").value = moment(new Date()).format("MM/DD/YYYY")
+let currentTask;
 
 function loadPage () {
-    readLocalStorage();
+
+    // Find the searched and the current task
+    const searchQueryTask = (location.search ? decodeURI(location.search.substring(1)) : "");
+    currentTask = (searchQueryTask ? searchQueryTask : unknownTask);
+
+    readLocalStorage(searchQueryTask);
     setDefaultTask ();
+    setUpPage();
     showLogs();
     addTasksClicks();
     addDeleteClick();
+
+    // Set the default value for the input
+    document.querySelector("#selectDate").value = moment(new Date()).format("MM/DD/YYYY");
+
+    // Show the current task
+    document.querySelector ("#task").innerHTML = currentTask;
 }
 
-function readLocalStorage () {
+function setUpPage() {
+    if (currentTask === unknownTask) {
+        document.querySelector(".add-task-help").classList.remove("hidden");
+        document.querySelector(".add-date-div").classList.add("hidden");
+    } else {
+        document.querySelector(".add-task-help").classList.add("hidden");
+        document.querySelector(".add-date-div").classList.remove("hidden");
+    }
+}
+
+function readLocalStorage (searchQueryTask) {
 
     const LStorage = localStorage.getItem("Tasky");
 
@@ -39,11 +47,11 @@ function readLocalStorage () {
     }
 
     // Add a task if we have one on the search query
-    if (searchTask && !tasks.includes(searchTask)) {
-        tasks.push(searchTask);
+    if (searchQueryTask && !tasks.includes(searchQueryTask)) {
+        tasks.push(searchQueryTask);
     }
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-    tasks.push(taskPlus);
+    tasks.push(addTaskSymbol);
 
     //Generate the links
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
@@ -74,7 +82,6 @@ function showLogs(){
         })
         document.querySelector (".logs").innerHTML = dateList.join("");
     }
-
 }
 
 function addLogDate () {
@@ -126,7 +133,7 @@ function addTasksClicks () {
     // Get all the links and add events to them
     const links = document.querySelectorAll(".task-link");
     for (var i = 0; i < links.length; i++) {
-        if (links[i].innerHTML === taskPlus){
+        if (links[i].innerHTML === addTaskSymbol){
             links[i].addEventListener("click", function (e) {
                 var ans = prompt("Please enter a name for the new task:");
                 if (ans !== null) {
