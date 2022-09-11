@@ -35,7 +35,7 @@ So, here it is, a full html/css/javascript solution without using any external p
         "values" : [ "20210928", "20211029", "20211127" ]
     },
     {
-        "task": "AC Filter",
+        "task": "AC Filter (6 mo)",
         "values" : [ "20210928" ]
     }
 ]
