@@ -1,8 +1,12 @@
 # Tasky
 
-Very low tech html page to maintain date-stamps for tasks completion.
+## Brief Description
 
-The idea is that I needed a log for when I've completed certain tasks.  For example, I needed to log when the dog got its last Heartworm/Fleas and Ticks medication. Another log about the timing on the AC Filter has been changed.
+Very low tech html page to maintain date stamps for tasks completion.
+
+## Description
+
+This project was created to fulfill a need to keep track of when I've completed certain tasks.  For example, I needed to log when the dog got its last Heartworm/Fleas and Ticks medication. Another log about the timing on the AC Filter has been changed.
 
 ## My goals were:
 
@@ -14,17 +18,16 @@ The idea is that I needed a log for when I've completed certain tasks.  For exam
 
 ## Why and How
 
-It was more of a reminder to be honest... I already had the solution in mind.  I needed to use __localStorage only__.  That way, I do not have to deal with authentication/authorization schema or permanent store to keep that information. No, just a simple, database-less, storage system.
+My goals were more of a reminder than actual goals to be honest... I already had the solution in mind.  I needed to use __localStorage only__.  That way, I do not have to deal with authentication/authorization schema or permanent store to keep that information. No, just a simple, database-less, storage system.
 
-An added benefit was that nobody else could access and corrupt my data.  It was to be just accessible, from the web, but each person would have their own private "database".
+An added benefit was that nobody else could access and corrupt my data.  It was to be just accessible, in the web browser, but each person would have their own private "database". I provide you the tool, you use it by plugging your own private data.
 
-I provide you the tool, you use it by plugging your own private data. The data are secure and private but, sadly temporary and device-bound.  Anybody clearing their localStorage or changing device would lose the data. You can always get access to the data for backing them up or making manual change by clicking on the bottom link "Show/Set Local Storage".
+The data are secure and private but they are sadly temporary and device-bound.  Anybody clearing their localStorage or changing device would lose the data. You can always backup the data or make manual changes by clicking on the bottom link __"Show/Set Local Storage"__.
 
-So, here it is, a full html/css/javascript solution without using any external package or files. The least amount of tech possible to avoid future fuss about upgrading etc.
+So, here it is, a full html/css/javascript solution without using any external package or files. The least amount of tech possible to avoid future upgrade/refresh, etc.  You can just drop it in a folder and start using it! No internet access required.
 
 ## Local storage data
 
-The localStorage value for "Tasky" should be organized like this:
 ```json
 [
     {

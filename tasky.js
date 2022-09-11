@@ -1,13 +1,6 @@
 const unknownTask = "Unknown";
 const taskPlus = "\u2795";
 
-// Get some UI elements
-const taskHeaderDiv = document.querySelector ("#task")
-const logsDiv = document.querySelector (".logs");
-const selectDateInput = document.querySelector("#selectDate");
-const lsDataTextarea = document.querySelector("#lsData");
-
-
 // Define the main variables
 let data = []; // Main structure for the schedule
 let tasks = []; // List of tasks
@@ -15,17 +8,17 @@ let tasks = []; // List of tasks
 // The current task
 const searchTask = (location.search ? decodeURI(location.search.substring(1)) : "");
 let currentTask = (searchTask ? searchTask : unknownTask);
-taskHeaderDiv.innerHTML = currentTask;
+document.querySelector ("#task").innerHTML = currentTask;
 if (currentTask === unknownTask) {
-    document.querySelector(".add-task-div").classList.remove("hidden");
-    document.querySelector(".add-log-div").classList.add("hidden");
+    document.querySelector(".add-task-help").classList.remove("hidden");
+    document.querySelector(".add-date-div").classList.add("hidden");
 } else {
-    document.querySelector(".add-task-div").classList.add("hidden");
-    document.querySelector(".add-log-div").classList.remove("hidden");
+    document.querySelector(".add-task-help").classList.add("hidden");
+    document.querySelector(".add-date-div").classList.remove("hidden");
 }
 
 // Set the default value for the input
-selectDateInput.value = moment(new Date()).format("MM/DD/YYYY")
+document.querySelector("#selectDate").value = moment(new Date()).format("MM/DD/YYYY")
 
 function loadPage () {
     readLocalStorage();
@@ -79,13 +72,13 @@ function showLogs(){
             logDateLabel = moment(x).format("MM/DD/YYYY");
             return logTemplate.supplant({logDate: x, logDateLabel});
         })
-        logsDiv.innerHTML = dateList.join("");
+        document.querySelector (".logs").innerHTML = dateList.join("");
     }
 
 }
 
 function addLogDate () {
-
+    const selectDateInput = document.querySelector("#selectDate")
     const selectedDate = moment(selectDateInput.value).format("YYYYMMDD");
 
     let task = data.find (x => x.task === currentTask);
@@ -150,15 +143,17 @@ function addTasksClicks () {
 }
 
 function getLSData() {
+    const lsDataTextarea = document.querySelector("#lsData");
     lsDataTextarea.value = localStorage.getItem("Tasky");
 }
 
 function setLSData() {
+    const lsDataTextarea = document.querySelector("#lsData");
     localStorage.setItem("Tasky", lsDataTextarea.value);
 }
 
 function closeLSData() {
-    itemRedirect(currentTask);
+    itemRedirect("");
 }
 
 function openLSData() {
