@@ -20,7 +20,7 @@ function loadPage () {
     addDeleteClick();
 
     // Set the default value for the input
-    document.querySelector("#selectDate").value = (new luxon.DateTime.now().toFormat("MM/dd/yyyy"));
+    document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
 
     // Show the current task
     document.querySelector ("#task").innerHTML = currentTask;
@@ -77,13 +77,13 @@ function showLogs(){
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
         const dateList = dates.map (x => {
-            logDateLabel = luxon.DateTime.fromISO(x).toFormat("MM/dd/yyyy");
+            logDateLabel = dayjs(x).format("MM/DD/YYYY");
             return logTemplate.supplant({logDate: x, logDateLabel});
         })
         document.querySelector (".logs").innerHTML = dateList.join("");
 
         if (dates.length > 0) {
-            const lastDate = luxon.DateTime.fromISO(dates[0]);
+            const lastDate = dayjs(dates[0]);
             const deltaLast = `Last completed: ${calcDeltaDate(lastDate)}`;
             document.querySelector (".delta-last").innerHTML = deltaLast;
         }
@@ -92,27 +92,30 @@ function showLogs(){
 }
 
 function calcDeltaDate (dateStamp) {
-    var a = luxon.DateTime.now();
-    var b = luxon.DateTime.fromISO(dateStamp);
+    var today = dayjs();
+    var completedDate = dayjs(dateStamp);
 
+    var years = today.diff(completedDate, 'year');
+    completedDate = completedDate.add(years, 'years');
 
-    var dateDiff = a.diff(b, ['years','months','days']);
-    const diffObj = {
-        years : Math.floor(dateDiff.years),
-        months : Math.floor(dateDiff.months),
-        days : Math.floor(dateDiff.days)
-    }
+    var months = today.diff(completedDate, 'months');
+    completedDate = completedDate.add(months, 'months');
 
-    let diff = (diffObj.years ? `${diffObj.years} year${diffObj.years === 1 ? "" : "s"} ` : "");
-    diff += (diffObj.months ? `${diffObj.months} month${diffObj.months === 1 ? "" : "s"} ` : "");
-    diff += (diffObj.days ? `${diffObj.days} day${diffObj.days === 1 ? "" : "s"}` : "");
+    var days = today.diff(completedDate, 'days');
 
-    return (diff ? `${diff} ${(a < b ? "ago" : "")}` : "Today");
+    let diff = (years ? `${years} year${years === 1 ? "" : "s"} ` : "");
+    diff += (months ? `${months} month${months === 1 ? "" : "s"} ` : "");
+    diff += (days ? `${days} day${days === 1 ? "" : "s"}` : "");
+
+    const prefix = (today < completedDate ? "In " : "");
+    const suffix = (today < completedDate ? "" : " ago");
+
+    return (diff ? `${prefix}${diff}${suffix}` : "Today");
 }
 
 function addLogDate () {
     const selectDateInput = document.querySelector("#selectDate")
-    const selectedDate = luxon.DateTime.fromFormat(selectDateInput.value, "MM/dd/yyyy").toFormat("yyyyMMdd");
+    const selectedDate = dayjs(selectDateInput.value, "MM/DD/YYYY").format("YYYYMMDD");
 
     let task = data.find (x => x.task === currentTask);
     if (!task) {

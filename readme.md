@@ -24,7 +24,7 @@ An added benefit was that nobody else could access and corrupt my data.  It was 
 
 The data are secure and private but they are sadly temporary and device-bound.  Anybody clearing their localStorage or changing device would lose the data. You can always backup the data or make manual changes by clicking on the bottom link __"Show/Set Local Storage"__.
 
-So, here it is, a full html/css/javascript solution without using any external package or files. The least amount of tech possible to avoid future upgrade/refresh, etc.  You can just drop it in a folder and start using it! No internet access required.
+So, here it is, a full html/css/javascript solution. I did have to use a very small external file from Day.js for date manipulations (https://day.js.org). The least amount of tech possible to avoid future upgrade/refresh, etc.  You can just drop it in a folder and start using it! No internet access required.
 
 ## Local storage data
 
