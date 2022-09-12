@@ -64,7 +64,7 @@ function readLocalStorage (searchQueryTask) {
 
 function setDefaultTask () {
     // If we haven't selected a task yet, show me the first from the list
-    if ((currentTask === unknownTask) && (tasks.length > 1)) {
+    if ((currentTask === unknownTask) && (tasks.length >= 1)) {
         if ((!tasks.includes(unknownTask)) && (tasks[0] !== currentTask)) {
             itemRedirect(tasks[0]);
         };
@@ -112,7 +112,7 @@ function calcDeltaDate (dateStamp) {
 
 function addLogDate () {
     const selectDateInput = document.querySelector("#selectDate")
-    const selectedDate = moment(selectDateInput.value).format("YYYYMMDD");
+    const selectedDate = luxon.DateTime.fromFormat(selectDateInput.value, "MM/dd/yyyy").toFormat("yyyyMMdd");
 
     let task = data.find (x => x.task === currentTask);
     if (!task) {
