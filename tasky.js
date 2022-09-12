@@ -20,7 +20,7 @@ function loadPage () {
     addDeleteClick();
 
     // Set the default value for the input
-    document.querySelector("#selectDate").value = moment(new Date()).format("MM/DD/YYYY");
+    document.querySelector("#selectDate").value = (new luxon.DateTime.now().toFormat("MM/dd/yyyy"));
 
     // Show the current task
     document.querySelector ("#task").innerHTML = currentTask;
@@ -77,13 +77,13 @@ function showLogs(){
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
         const dateList = dates.map (x => {
-            logDateLabel = moment(x).format("MM/DD/YYYY");
+            logDateLabel = luxon.DateTime.fromISO(x).toFormat("MM/dd/yyyy");
             return logTemplate.supplant({logDate: x, logDateLabel});
         })
         document.querySelector (".logs").innerHTML = dateList.join("");
 
         if (dates.length > 0) {
-            const lastDate = moment(dates[0],"YYYYMMDD");
+            const lastDate = luxon.DateTime.fromISO(dates[0]);
             const deltaLast = `Last completed: ${calcDeltaDate(lastDate)}`;
             document.querySelector (".delta-last").innerHTML = deltaLast;
         }
@@ -92,22 +92,22 @@ function showLogs(){
 }
 
 function calcDeltaDate (dateStamp) {
-    var a = moment();
-    var b = moment(dateStamp);
+    var a = luxon.DateTime.now();
+    var b = luxon.DateTime.fromISO(dateStamp);
 
-    var years = a.diff(b, 'year');
-    b.add(years, 'years');
 
-    var months = a.diff(b, 'months');
-    b.add(months, 'months');
+    var dateDiff = a.diff(b, ['years','months','days']);
+    const diffObj = {
+        years : Math.floor(dateDiff.years),
+        months : Math.floor(dateDiff.months),
+        days : Math.floor(dateDiff.days)
+    }
 
-    var days = a.diff(b, 'days');
+    let diff = (diffObj.years ? `${diffObj.years} year${diffObj.years === 1 ? "" : "s"} ` : "");
+    diff += (diffObj.months ? `${diffObj.months} month${diffObj.months === 1 ? "" : "s"} ` : "");
+    diff += (diffObj.days ? `${diffObj.days} day${diffObj.days === 1 ? "" : "s"}` : "");
 
-    let diff = (years ? `${years} year${years === 1 ? "" : "s"} ` : "");
-    diff += (months ? `${months} month${months === 1 ? "" : "s"} ` : "");
-    diff += (days ? `${days} day${days === 1 ? "" : "s"}` : "");
-
-    return (diff ? `${diff} ago` : "Today");
+    return (diff ? `${diff} ${(a < b ? "ago" : "")}` : "Today");
 }
 
 function addLogDate () {
