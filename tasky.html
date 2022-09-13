@@ -50,8 +50,14 @@
 
 <script id="log-template" type="text/template">
     <div class="log">
-        <div class="log-date">{logDateLabel}</div>
-        <i data-value="{logDate}" class="delete-icon">&#128465;</i>
+        <div class="log-date">
+            {logDateLabel}
+            <i data-value="{logDate}" class="edit-icon">&#9998;</i>
+            <i data-value="{logDate}" class="delete-icon">&#128465;</i>
+        </div>
+        <div class="log-comment">
+            {comment}
+        </div>
     </div>
 </script>
 

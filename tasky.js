@@ -78,7 +78,8 @@ function showLogs(){
         const dates = task.values.sort().reverse();
         const dateList = dates.map (x => {
             logDateLabel = dayjs(x).format("MM/DD/YYYY");
-            return logTemplate.supplant({logDate: x, logDateLabel});
+            comment = (task[x] && task[x].comment ? task[x].comment : "");
+            return logTemplate.supplant({logDate: x, logDateLabel, comment});
         })
         document.querySelector (".logs").innerHTML = dateList.join("");
 
@@ -103,9 +104,9 @@ function calcDeltaDate (dateStamp) {
 
     var days = today.diff(completedDate, 'days');
 
-    let diff = (years ? `${years} year${years === 1 ? "" : "s"} ` : "");
-    diff += (months ? `${months} month${months === 1 ? "" : "s"} ` : "");
-    diff += (days ? `${days} day${days === 1 ? "" : "s"}` : "");
+    let diff = (years ? `${Math.abs(years)} year${years === 1 ? "" : "s"} ` : "");
+    diff += (months ? `${Math.abs(months)} month${months === 1 ? "" : "s"} ` : "");
+    diff += (days ? `${Math.abs(days)} day${days === 1 ? "" : "s"}` : "");
 
     const prefix = (today < completedDate ? "In " : "");
     const suffix = (today < completedDate ? "" : " ago");
@@ -128,6 +129,11 @@ function addLogDate () {
     }
     localStorage.setItem("Tasky", JSON.stringify(data));
     itemRedirect(currentTask);
+}
+
+function getDateComment (task, date) {
+
+
 }
 
 function addDeleteClick () {

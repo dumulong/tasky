@@ -100,10 +100,18 @@ i {
 
 .log {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: column wrap;
     align-items: center;
     margin-bottom: 0.4rem;
+    border-bottom: 1px solid rgb(232,232,232);
+    width: 100%;
+    padding: .5rem 0;
 }
+
+.log-comment {
+    color:rgba(51, 51, 51, 0.5)
+}
+
 
 .delta-last {
     margin-bottom: 1rem;
