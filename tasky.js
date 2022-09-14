@@ -91,6 +91,11 @@ function showLogs(){
             document.querySelector (".delta-last").innerHTML = deltaLast;
         }
 
+    } else {
+        if (currentTask !== unknownTask) {
+            const logs = document.querySelector (".logs");
+            logs.innerHTML = `<div class="log log-empty">Entries not found, click "Add"</div>`;    
+        }
     }
 }
 
@@ -199,6 +204,10 @@ const modalFnc = {
 
         const editLogDate = document.querySelector('#editLogDate');
         editLogDate.innerHTML = dayjs(logDate).format("MM/DD/YYYY");
+
+        const logDelta = document.querySelector('.log-delta');
+        const delta = dayjs(logDate);
+        logDelta.innerHTML = `${calcDeltaDate(delta)}`;
 
         const editLogComment = document.querySelector('[name="editLogComment"]');
         const logDateData = task[logDate];

@@ -40,6 +40,7 @@
     </div>
 </div>
 
+<!-- Log template -->
 <script id="log-template" type="text/template">
     <div class="log">
         <div class="log-date">
@@ -52,6 +53,7 @@
     </div>
 </script>
 
+<!-- Local Storage Dialog -->
 <div class="modal" id="modal-local-storage" data-pre-load-fnc="fillLSData">
     <div class="modal-bg modal-exit"></div>
     <div class="modal-container modal-lg">
@@ -67,6 +69,7 @@
     </div>
 </div>
 
+<!-- New Task Dialog -->
 <div class="modal" id="modal-add-task">
     <div class="modal-bg modal-exit"></div>
     <div class="modal-container modal-md">
@@ -82,12 +85,14 @@
     </div>
 </div>
 
+<!-- Edit Log Dialog -->
 <div class="modal" id="modal-edit-log" data-pre-load-fnc="fillLogData">
     <div class="modal-bg modal-exit"></div>
     <div class="modal-container modal-md">
         <button class="modal-close modal-exit">X</button>
         <div id="editLogTask" class="modal-title"></div>
         <div id="editLogDate" class="modal-subtitle"></div>
+        <div class="log-delta"></div>
         <div>
             <textarea name="editLogComment" id="editLogComment" rows="4"></textarea>
             <div class="modal-button-group">
