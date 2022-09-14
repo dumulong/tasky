@@ -32,11 +32,17 @@ So, here it is, a full html/css/javascript solution. I did have to use a very sm
 [
     {
         "task": "Dog Meds",
-        "values" : [ "20210928", "20211029", "20211127" ]
+        "values" : [ "20210928", "20211029", "20211127" ],
+        "20211029" : {
+            "comment" : "She may have spit it out..."
+        }
     },
     {
         "task": "AC Filter (6 mo)",
-        "values" : [ "20210928" ]
+        "values" : [ "20210928" ],
+        "20210928" : {
+            "comment" : "They were very dirty"
+        }
     }
 ]
 ```

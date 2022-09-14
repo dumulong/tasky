@@ -35,25 +35,71 @@
         </div>
     </div>
     <div class="logs"></div>
-    <div class="show-admin" onclick="openLSData()">
+    <div class="show-LS-dialog" data-modal="modal-local-storage">
         <a id="openLSData">Show/Set Local Storage</a>
-    </div>
-</div>
-
-<div class="admin hidden">
-    <textarea id="lsData" name="lsData" rows="10"></textarea>
-    <div class="raw-data-buttons">
-        <button id="btnSetLS" onclick="setLSData()">Set Local Storage</button>
-        <button id="btnClose" onclick="closeLSData()">Close</button>
     </div>
 </div>
 
 <script id="log-template" type="text/template">
     <div class="log">
-        <div class="log-date">{logDateLabel}</div>
-        <i data-value="{logDate}" class="delete-icon">&#128465;</i>
+        <div class="log-date">
+            {logDateLabel}
+            <i data-value="{logDate}" class="icon edit-icon" data-modal="modal-edit-log">&#9998;</i>
+        </div>
+        <div class="log-comment">
+            {comment}
+        </div>
     </div>
 </script>
+
+<div class="modal" id="modal-local-storage" data-pre-load-fnc="fillLSData">
+    <div class="modal-bg modal-exit"></div>
+    <div class="modal-container modal-lg">
+        <button class="modal-close modal-exit">X</button>
+        <div class="modal-subtitle">Local Storage</div>
+        <div>
+            <textarea id="lsData" name="lsData" rows="10"></textarea>
+            <div class="modal-button-group">
+                <button id="btnSetLS" onclick="setLSData()">Set</button>
+                <button id="btnClose" onclick="closeAllModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-add-task">
+    <div class="modal-bg modal-exit"></div>
+    <div class="modal-container modal-md">
+        <button class="modal-close modal-exit">X</button>
+        <div class="modal-subtitle">New task</div>
+        <div>
+            <input name="newTaskName" id="newTaskName" value="" />
+            <div class="modal-button-group">
+                <button name="btnAddTask" id="btnAddTask" onclick="addNewTask ()">Add</button>
+                <button name="btnCancelTask" id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-edit-log" data-pre-load-fnc="fillLogData">
+    <div class="modal-bg modal-exit"></div>
+    <div class="modal-container modal-md">
+        <button class="modal-close modal-exit">X</button>
+        <div id="editLogTask" class="modal-title"></div>
+        <div id="editLogDate" class="modal-subtitle"></div>
+        <div>
+            <textarea name="editLogComment" id="editLogComment" rows="4"></textarea>
+            <div class="modal-button-group">
+                <button name="btnSaveLog" id="btnSaveLog" onclick="saveLog ()">Save</button>
+                <button name="btnDeleteLog" id="btnDeleteLog" onclick="deleteLog ()">Delete</button>
+            </div>
+            <div class="modal-button-group">
+                <button name="btnCancelTask" id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="tasky.js"></script>
 

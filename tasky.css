@@ -25,6 +25,10 @@ input {
     padding: .5rem 1rem;
 }
 
+textarea {
+    width: 100%;
+}
+
 button {
     background-color: #0d6efd;
     border-color: white;
@@ -32,14 +36,8 @@ button {
     padding: .5rem 1.6rem;
 }
 
-textarea {
-    width: 90%;
-    margin: 1rem 0;
-}
-
-i {
+.icon {
     font-style: normal;
-    color: red;
     font-weight: 600;
     font-size: 2rem;
 }
@@ -55,8 +53,17 @@ i {
     align-items: stretch;
 }
 
-#selectDate {
-    width: 10rem;
+.well {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    min-height: 20px;
+    padding: 19px;
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
 }
 
 #tasksList {
@@ -74,20 +81,39 @@ i {
     padding: 0 .8rem;
 }
 
-.task-split {
-    font-size: 1rem;
-}
-
-#task {
-    font-weight: bold;
-    font-size: 2.2em;
-    color:#0d6efd;
-}
-
 #tasks {
     display: flex;
     flex-flow: row wrap;
     font-size: rem;
+}
+
+#task {
+    color:#0d6efd;
+    font-weight: bold;
+    font-size: 2.2em;
+}
+
+.task-split {
+    font-size: 1rem;
+}
+
+.link {
+    color: gray;
+    padding-right: 10px;
+    padding: 0 3px;
+    cursor: pointer;
+}
+
+#selectDate {
+    width: 10rem;
+}
+
+#lsData {
+    padding: 1rem;
+}
+
+#newTaskName {
+    width:100%;
 }
 
 .logs {
@@ -100,61 +126,118 @@ i {
 
 .log {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: column wrap;
     align-items: center;
     margin-bottom: 0.4rem;
+    border-bottom: 1px solid rgb(232,232,232);
+    width: 100%;
+    padding: .5rem 0;
+}
+
+.log-comment {
+    color:rgba(51, 51, 51, 0.5)
 }
 
 .delta-last {
     margin-bottom: 1rem;
 }
 
-.delete-icon {
-    margin-left: 1rem
-}
-
-.well {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
-    min-height: 20px;
-    padding: 19px;
-    margin-bottom: 20px;
-    background-color: #f5f5f5;
-    border: 1px solid #e3e3e3;
-    border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
-}
-
-.link {
-    color: gray;
-    padding-right: 10px;
-    padding: 0 3px;
-    cursor: pointer;
-}
-
-.show-admin {
+.show-LS-dialog {
     margin: 20px;
     color: #ccc;
     font-size: 1.4rem;
     font-style: italic;
 }
 
-.admin {
-    margin-bottom: 20px;
+/*
+-----------------------------------------------
+Style for the modals
+-----------------------------------------------
+*/
+
+.modal {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#lsData {
-    padding: 1rem;
+.modal.open {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
 }
 
-.raw-data-buttons {
+.modal-bg {
+    position: absolute;
+    background: silver;
+    width: 100%;
+    height: 100%;
+}
+
+.modal-container {
+    border-radius: 10px;
+    background: #fff;
+    position: relative;
+    padding: 30px;
+}
+
+.modal-close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    outline: none;
+    appearance: none;
+    color: #e60000;
+    background: none;
+    border: 0px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-exit {
+    padding: 0;
+    margin: 0;
+}
+
+.modal-container.modal-sm {
+    width: 275px;
+}
+
+.modal-container.modal-md {
+    width: 350px;
+}
+
+.modal-container.modal-lg {
+    width: 400px;
+}
+
+.modal-title {
+    color:#0d6efd;
+    font-weight: bold;
+    font-size: 1.6em;
+}
+
+.modal-subtitle {
+    font-weight: bold;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+}
+
+.modal-button-group {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-around;
+    margin: 1rem 0;
 }
 
-.raw-data-buttons button {
-    width: 16rem;
+.modal-button-group button {
+    width: 12rem;
 }
