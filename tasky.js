@@ -171,7 +171,7 @@ function deleteLog () {
     const logDate = editLogDate.innerHTML;
 
     if (task.values.length === 1) {
-        data.splice(taskNdx);
+        data.splice(taskNdx, 1);
         redirectTo = "";
     } else {
         const logEntry = dayjs(logDate).format("YYYYMMDD");
