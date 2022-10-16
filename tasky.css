@@ -143,8 +143,17 @@ button {
     color:rgba(51, 51, 51, 0.5)
 }
 
+.log-empty {
+    color: #990f02;
+}
+
 .delta-last {
     margin-bottom: 1rem;
+}
+
+.log-delta {
+    color: #ccc;
+    margin-bottom: 6px;
 }
 
 .show-LS-dialog {
@@ -233,7 +242,6 @@ Style for the modals
 .modal-subtitle {
     font-weight: bold;
     font-size: 1.6rem;
-    margin-bottom: 6px;
 }
 
 .modal-button-group {
