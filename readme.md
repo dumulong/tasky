@@ -32,6 +32,7 @@ So, here it is, a full html/css/javascript solution. I did have to use a very sm
 [
     {
         "task": "Dog Meds",
+        "description" : "Medications for the dog",
         "values" : [ "20210928", "20211029", "20211127" ],
         "20211029" : {
             "comment" : "She may have spit it out..."
@@ -39,6 +40,7 @@ So, here it is, a full html/css/javascript solution. I did have to use a very sm
     },
     {
         "task": "AC Filter (6 mo)",
+        "description" : "Changing the AC filter every 6 months",
         "values" : [ "20210928" ],
         "20210928" : {
             "comment" : "They were very dirty"

@@ -14,6 +14,7 @@ function loadPage () {
 
     readLocalStorage(searchQueryTask);
     setDefaultTask ();
+    setTaskDescription();
     setUpPage();
     showLogs();
     addTasksClicks();
@@ -56,7 +57,7 @@ function readLocalStorage (searchQueryTask) {
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
 
     // Add a link for a new task
-    links.push(`<div class="task-link add-task-symbol" data-modal="modal-add-task">${addTaskSymbol}</div>`);
+    links.push(`<div class="task-link add-task-symbol" data-modal="modal-task">${addTaskSymbol}</div>`);
 
     //Add them to the list
     const separatorTemplate = '<span class="task-split">|</span>'
@@ -73,8 +74,16 @@ function setDefaultTask () {
     }
 }
 
+function setTaskDescription() {
+    const taskDesc = document.querySelector('.task-desc');
+    const task = findCurrentTask();
+    if (task) {
+        taskDesc.innerHTML = task.description || "";
+    }
+}
+
 function showLogs(){
-    const task = data.find (x => x.task === currentTask);
+    const task = findCurrentTask();
     if (task) {
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
@@ -120,7 +129,7 @@ function addLogDate () {
     const selectDateInput = document.querySelector("#selectDate")
     const selectedDate = dayjs(selectDateInput.value, "MM/DD/YYYY").format("YYYYMMDD");
 
-    let task = data.find (x => x.task === currentTask);
+    let task = findCurrentTask();
     if (!task) {
         task = { task : currentTask, values : [ selectedDate ] };
         data.push (task);
@@ -134,7 +143,7 @@ function addLogDate () {
 }
 
 function saveLog () {
-    const task = data.find (x => x.task === currentTask);
+    const task = findCurrentTask();
     const editLogDate = document.querySelector('#editLogDate');
     const logDate = editLogDate.innerHTML;
 
@@ -174,6 +183,19 @@ function addNewTask () {
     itemRedirect(taskInput.value);
 }
 
+function updateTask () {
+    const taskInput = document.querySelector("[name=newTaskName]");
+    const taskDescInput = document.querySelector("[name=taskDesc]");
+    const task = findCurrentTask();
+
+    if (task) {
+        task.task = taskInput.value;
+        task.description = taskDescInput.value;
+        localStorage.setItem("Tasky", JSON.stringify(data));
+    }
+    itemRedirect(taskInput.value);
+}
+
 function addTasksClicks () {
     // Get all the links and add events to them
     const links = document.querySelectorAll(".task-link");
@@ -189,10 +211,40 @@ function addTasksClicks () {
 // Modal
 
 const modalFnc = {
+    toggleTaskAddUpdate : (event) => {
+        const trigger = event.target;
+        const taskInput = document.querySelector("[name=newTaskName]");
+        const title = document.querySelector("#modal-task .modal-subtitle");
+        const descDiv = document.querySelector(".task-desc-input");
+        const btnUpdate = document.querySelector("#btnUpdateTask");
+        const btnAdd = document.querySelector("#btnAddTask");
+
+        if (trigger.classList.contains("add-task-symbol")) {
+            taskInput.value = "";
+            title.innerHTML = "Add Task";
+            descDiv.classList.add("hidden");
+            btnUpdate.classList.add("hidden");
+            btnAdd.classList.remove("hidden");
+        } else { // Update task
+            const task = findCurrentTask();
+            if (task) {
+                taskInput.value = task.task;
+                const descInput = document.querySelector("[name=taskDesc]");
+                descInput.value = task.description || "";
+                descDiv.classList.remove("hidden");
+            } else {
+                taskInput.value = currentTask;
+                descDiv.classList.add("hidden");
+            }
+            title.innerHTML = "Update Task";
+            btnUpdate.classList.remove("hidden");
+            btnAdd.classList.add("hidden");
+        }
+    },
     fillLogData : (event) => {
         const trigger = event.target;
         const logDate = trigger.dataset.value;
-        const task = data.find (x => x.task === currentTask);
+        const task = findCurrentTask();
 
         const editLogTask = document.querySelector('#editLogTask');
         editLogTask.innerHTML = task.task;
@@ -258,6 +310,10 @@ function setLSData() {
 // Helper function
 function itemRedirect (searchQuery) {
     window.location.search = searchQuery
+}
+
+function findCurrentTask () {
+    return data.find (x => x.task === currentTask);
 }
 
 // Helper function: given an object o, replace {var} with value of property o.var for any string

@@ -23,7 +23,7 @@
 
 <div class="main container">
     <div class="well">
-        <div id="task"></div>
+        <div id="task" data-modal="modal-task"></div>
         <div class="delta-last"></div>
         <div id="tasksList"></div>
         <div class="add-task-help hidden">
@@ -34,6 +34,7 @@
             <button name="btnAddLog" id="btnAddLog" onclick="addLogDate ()">Add</button>
         </div>
     </div>
+    <div class="task-desc"></div>
     <div class="logs"></div>
     <div class="show-LS-dialog" data-modal="modal-local-storage">
         <a id="openLSData">Show/Set Local Storage</a>
@@ -67,15 +68,20 @@
     </div>
 </div>
 
-<div class="modal" id="modal-add-task">
+<div class="modal" id="modal-task" data-pre-load-fnc="toggleTaskAddUpdate">
     <div class="modal-bg modal-exit"></div>
     <div class="modal-container modal-md">
         <button class="modal-close modal-exit">X</button>
-        <div class="modal-subtitle">New task</div>
+        <div class="modal-subtitle">Add Task</div>
         <div>
             <input name="newTaskName" id="newTaskName" value="" />
+            <div class="task-desc-input">
+                <div>Description</div>
+                <textarea name="taskDesc" id="taskDesc"  cols="30" rows="4" value=""></textarea>
+            </div>
             <div class="modal-button-group">
                 <button name="btnAddTask" id="btnAddTask" onclick="addNewTask ()">Add</button>
+                <button name="btnUpdateTask" id="btnUpdateTask" onclick="updateTask ()">Update</button>
                 <button name="btnCancelTask" id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
             </div>
         </div>

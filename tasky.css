@@ -93,6 +93,11 @@ button {
     font-size: 2.2em;
 }
 
+.task-desc {
+    margin-top: 4px;
+    color: hsl(0, 45%, 45%);
+}
+
 .task-split {
     font-size: 1rem;
 }
