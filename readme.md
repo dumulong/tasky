@@ -29,6 +29,14 @@ So, here it is, a full html/css/javascript solution. I did have to use a very sm
 ## Local storage data
 
 ```json
+// local storage key: "Tasky_preferences"
+{
+    "currentTask" : "Dog Meds"
+}
+```
+
+```json
+// local storage key: "Tasky"
 [
     {
         "task": "Dog Meds",

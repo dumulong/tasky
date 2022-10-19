@@ -1,18 +1,19 @@
 const unknownTask = "Unknown";
 const addTaskSymbol = "\u2795";
 
+const LocalStorageKey = Object.freeze({
+    "data" : "Tasky",
+    "prefs" : "Tasky_preferences"
+})
+
 // Define the main variables
+let prefs = { currentTask : "" };
 let data = []; // The local storage data
 let tasks = []; // List of tasks
-let currentTask;
 
 function loadPage () {
 
-    // Find the searched and the current task
-    const searchQueryTask = (location.search ? decodeURI(location.search.substring(1)) : "");
-    currentTask = (searchQueryTask ? searchQueryTask : unknownTask);
-
-    readLocalStorage(searchQueryTask);
+    readLocalStorage();
     setDefaultTask ();
     setTaskDescription();
     setUpPage();
@@ -24,11 +25,11 @@ function loadPage () {
     document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
 
     // Show the current task
-    document.querySelector ("#task").innerHTML = currentTask;
+    document.querySelector ("#task").innerHTML = prefs.currentTask;
 }
 
 function setUpPage() {
-    if (currentTask === unknownTask) {
+    if (prefs.currentTask === unknownTask) {
         document.querySelector(".add-task-help").classList.remove("hidden");
         document.querySelector(".add-date-div").classList.add("hidden");
     } else {
@@ -37,21 +38,31 @@ function setUpPage() {
     }
 }
 
-function readLocalStorage (searchQueryTask) {
+function readLocalStorage () {
 
-    const LStorage = localStorage.getItem("Tasky");
+    const TaskyPrefLS = localStorage.getItem(LocalStorageKey.prefs);
+    const taskyLS = localStorage.getItem(LocalStorageKey.data);
 
-    if (LStorage) {
+    if (taskyLS) {
         // Extract the data and the task list from the localStorage
-        data = JSON.parse(LStorage)
+        data = JSON.parse(taskyLS)
         data.forEach(item => tasks.push(item.task));
     }
 
+    if (TaskyPrefLS) {
+        // Extract the preferences from the localStorage
+        prefs = JSON.parse(TaskyPrefLS);
+    }
+
     // Add a task if we have one on the search query
-    if (searchQueryTask && !tasks.includes(searchQueryTask)) {
-        tasks.push(searchQueryTask);
+    if (prefs.currentTask && !tasks.includes(prefs.currentTask)) {
+        tasks.push(prefs.currentTask);
     }
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+    if (!prefs.currentTask) {
+        prefs.currentTask = tasks[0];
+    }
 
     //Generate the links
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
@@ -67,8 +78,8 @@ function readLocalStorage (searchQueryTask) {
 
 function setDefaultTask () {
     // If we haven't selected a task yet, show me the first from the list
-    if ((currentTask === unknownTask) && (tasks.length >= 1)) {
-        if ((!tasks.includes(unknownTask)) && (tasks[0] !== currentTask)) {
+    if ((prefs.currentTask === unknownTask) && (tasks.length >= 1)) {
+        if ((!tasks.includes(unknownTask)) && (tasks[0] !== prefs.currentTask)) {
             itemRedirect(tasks[0]);
         };
     }
@@ -101,7 +112,7 @@ function showLogs(){
         }
 
     } else {
-        if (currentTask !== unknownTask) {
+        if (prefs.currentTask !== unknownTask) {
             const logs = document.querySelector (".logs");
             logs.innerHTML = `<div class="log log-empty">Entries not found, click "Add"</div>`;
         }
@@ -136,15 +147,15 @@ function addLogDate () {
 
     let task = findCurrentTask();
     if (!task) {
-        task = { task : currentTask, values : [ selectedDate ] };
+        task = { task : prefs.currentTask, values : [ selectedDate ] };
         data.push (task);
     } else {
         if (!task.values.includes(selectedDate)){
             task.values.push(selectedDate);
         }
     }
-    localStorage.setItem("Tasky", JSON.stringify(data));
-    itemRedirect(currentTask);
+    saveData ();
+    itemRedirect(prefs.currentTask);
 }
 
 function saveLog () {
@@ -158,14 +169,14 @@ function saveLog () {
         task[logEntry] = {};
     }
     task[logEntry].comment = editLogComment.value;
-    localStorage.setItem("Tasky", JSON.stringify(data));
-    itemRedirect(currentTask);
+    saveData ();
+    itemRedirect(prefs.currentTask);
 }
 
 function deleteLog () {
-    const taskNdx = data.findIndex (x => x.task === currentTask);
+    const taskNdx = data.findIndex (x => x.task === prefs.currentTask);
     const task = data[taskNdx];
-    let redirectTo = currentTask;
+    let redirectTo = prefs.currentTask;
 
     const editLogDate = document.querySelector('#editLogDate');
     const logDate = editLogDate.innerHTML;
@@ -177,9 +188,9 @@ function deleteLog () {
         const logEntry = dayjs(logDate).format("YYYYMMDD");
         task.values = task.values.filter(x => x !== logEntry);
         delete task[logEntry];
-        redirectTo = currentTask;
+        redirectTo = prefs.currentTask;
     }
-    localStorage.setItem("Tasky", JSON.stringify(data));
+    saveData ();
     itemRedirect(redirectTo);
 }
 
@@ -196,7 +207,7 @@ function updateTask () {
     if (task) {
         task.task = taskInput.value;
         task.description = taskDescInput.value;
-        localStorage.setItem("Tasky", JSON.stringify(data));
+        saveData ();
     }
     itemRedirect(taskInput.value);
 }
@@ -238,7 +249,7 @@ const modalFnc = {
                 descInput.value = task.description || "";
                 descDiv.classList.remove("hidden");
             } else {
-                taskInput.value = currentTask;
+                taskInput.value = prefs.currentTask;
                 descDiv.classList.add("hidden");
             }
             title.innerHTML = "Update Task";
@@ -270,8 +281,11 @@ const modalFnc = {
         }
     },
     fillLSData : () => {
+        const lsDataTextarea = document.querySelector("#lsData");
+        lsDataTextarea.classList.remove("invalid"); // Just in case...
+
         const lsData = document.querySelector('[name="lsData"]');
-        lsData.value = localStorage.getItem("Tasky");
+        lsData.value = localStorage.getItem(LocalStorageKey.data);
     }
 }
 
@@ -312,17 +326,33 @@ function closeAllModal () {
 
 function setLSData() {
     const lsDataTextarea = document.querySelector("#lsData");
-    localStorage.setItem("Tasky", lsDataTextarea.value);
-    itemRedirect("");
+    try {
+        data = JSON.parse(lsDataTextarea.value);
+        saveData ();
+        itemRedirect("");
+    } catch (error) {
+        lsDataTextarea.classList.add("invalid");
+        console.log(`%cERROR: %cInvalid data.`, "color:red;font-weight:800", "");
+    }
 }
 
 // Helper function
-function itemRedirect (searchQuery) {
-    window.location.search = searchQuery
+function saveData () {
+    localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
+}
+
+function savePrefs () {
+    localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(prefs));
+}
+
+function itemRedirect (task) {
+    prefs = { ...prefs, currentTask : task };
+    savePrefs ();
+    window.location.reload();
 }
 
 function findCurrentTask () {
-    return data.find (x => x.task === currentTask);
+    return data.find (x => x.task === prefs.currentTask);
 }
 
 // Helper function: given an object o, replace {var} with value of property o.var for any string
