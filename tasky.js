@@ -532,8 +532,8 @@ function savePrefs (prefUpdateObj = {}) {
 }
 
 function itemRedirect (task) {
-    const taskRedirect = (task === undefined ? prefs.currentTask : task);
-    savePrefs ({ currentTask : taskRedirect });
+    if (!task) { return; }
+    savePrefs ({ currentTask : task });
     window.location.reload();
 }
 
