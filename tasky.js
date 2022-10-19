@@ -26,7 +26,7 @@ function loadPage () {
     showPagination();
     addTasksClicks();
     addModalClick();
-    
+
     // Set the default value for the input
     document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
 
@@ -119,7 +119,7 @@ function showLogs(){
 
         if (dates.length > 0) {
             const lastDate = dayjs(dates[0]);
-            const deltaLast = `Last completed: ${calcDeltaDate(lastDate)}`;
+            const deltaLast = `Latest entry: ${calcDeltaDate(lastDate)}`;
             document.querySelector (".delta-last").innerHTML = deltaLast;
         }
 
