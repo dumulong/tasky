@@ -10,7 +10,7 @@ const LocalStorageKey = Object.freeze({
 let prefs = {
     currentTask : "",
     currentPage : 1,
-    pageSize : 3,
+    pageSize : 10,
     pageWindow : 5
 };
 let data = []; // The local storage data
@@ -23,10 +23,10 @@ function loadPage () {
     setTaskDescription();
     setUpPage();
     showLogs();
+    showPagination();
     addTasksClicks();
     addModalClick();
-    showPagination();
-
+    
     // Set the default value for the input
     document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
 
@@ -108,7 +108,9 @@ function showLogs(){
     if (task) {
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
-        const dateList = dates.map (x => {
+        const pageStats = calcPage();
+        const pageDates = dates.slice(pageStats.min, pageStats.max + 1);
+        const dateList = pageDates.map (x => {
             logDateLabel = dayjs(x).format("MM/DD/YYYY");
             comment = (task[x] && task[x].comment ? task[x].comment : "");
             return logTemplate.supplant({logDate: x, logDateLabel, comment});
@@ -349,7 +351,8 @@ function setLSData() {
 // Helper function
 function calcPage() {
   // Get the highest page number
-  const pageMax = Math.max(Math.ceil(data.length / prefs.pageSize), 1);
+  const task = findCurrentTask();
+  const pageMax = Math.max(Math.ceil(task.values.length / prefs.pageSize), 1);
 
   // Find the current page..
   let currentPage = prefs.currentPage;
@@ -365,7 +368,7 @@ function calcPage() {
 
   // Find the index of the first and last item to present
   const min = (currentPage - 1) * prefs.pageSize;
-  const max = Math.min(currentPage * prefs.pageSize, data.length) - 1;
+  const max = Math.min(currentPage * prefs.pageSize, task.values.length) - 1;
 
   // Now let's calculate the pagination window (for the page toolbar)
   const halfPageWindow = Math.floor(prefs.pageWindow / 2);
@@ -500,17 +503,37 @@ function showPagination() {
   });
 }
 
+function gotoPage(pageNumber) {
+  if (pageNumber === undefined) {
+    const lsPageNumber = localStorage.getItem("current_page");
+    pageNumber = lsPageNumber ? parseInt(lsPageNumber) : 1;
+    const pageStats = calcPage();
+    const max = pageStats.pagination.pageMax;
+    if (pageNumber > max) {
+      pageNumber = max;
+    }
+  }
+  savePrefs({ currentPage: pageNumber });
+  itemRedirect(prefs.currentTask);
+}
+
+function changePageSize (pageSize) {
+    savePrefs({ pageSize });
+    itemRedirect(prefs.currentTask);
+}
+
 function saveData () {
     localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
 }
 
 function savePrefs (prefUpdateObj = {}) {
-    const newPrefs = { ...prefs, ...prefUpdateObj };
-    localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(newPrefs));
+    prefs = { ...prefs, ...prefUpdateObj };
+    localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(prefs));
 }
 
 function itemRedirect (task) {
-    savePrefs ({ currentTask : task });
+    const taskRedirect = (task === undefined ? prefs.currentTask : task);
+    savePrefs ({ currentTask : taskRedirect });
     window.location.reload();
 }
 

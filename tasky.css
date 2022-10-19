@@ -174,7 +174,11 @@ button {
   flex-direction: row;
   width: 100%;
   justify-content: center;
-  margin: 10px 0;
+  padding: 10px 0;
+}
+
+.pagination-top {
+  border-bottom: 1px solid rgb(232, 232, 232);
 }
 
 .page-button {
@@ -201,6 +205,20 @@ button {
 
 div.page-button.current-page {
   background-color: rgb(222, 235, 255);
+}
+
+.items-per-page {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+  margin: 10px 0;
+  column-gap: 6px;
+}
+
+.page-size {
+  text-decoration: underline;
+  color: var(--accent-color);
 }
 
 /*
