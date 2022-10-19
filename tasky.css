@@ -142,6 +142,7 @@ button {
 }
 
 .log-comment {
+  white-space: pre;
   color: hsla(0, 0%, 20%, 0.5);
 }
 
