@@ -532,7 +532,6 @@ function savePrefs (prefUpdateObj = {}) {
 }
 
 function itemRedirect (task) {
-    if (!task) { return; }
     savePrefs ({ currentTask : task });
     window.location.reload();
 }
