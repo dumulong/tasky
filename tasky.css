@@ -169,6 +169,59 @@ button {
 .invalid {
   background-color: hsl(0, 100%, 90%);
 }
+
+.pagination {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.pagination-top {
+  border-bottom: 1px solid rgb(232, 232, 232);
+}
+
+.page-button {
+  border: 1px solid silver;
+  width: 30px;
+  margin: 0 3px;
+  border-radius: 6px;
+  text-align: center;
+  background-color: white;
+  font-size: 1.1em;
+  font-weight: 600;
+  padding: 2px 0;
+}
+
+.page-button a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.page-button.inactive {
+  background-color: #D8d8d8;
+  cursor: pointer;
+}
+
+div.page-button.current-page {
+  background-color: rgb(222, 235, 255);
+}
+
+.items-per-page {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+  margin: 10px 0;
+  column-gap: 6px;
+}
+
+.page-size {
+  text-decoration: underline;
+  color: var(--accent-color);
+}
+
 /*
 -----------------------------------------------
 Style for the modals
