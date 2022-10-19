@@ -7,7 +7,12 @@ const LocalStorageKey = Object.freeze({
 })
 
 // Define the main variables
-let prefs = { currentTask : "" };
+let prefs = {
+    currentTask : "",
+    currentPage : 1,
+    pageSize : 10,
+    pageWindow : 5
+};
 let data = []; // The local storage data
 let tasks = []; // List of tasks
 
@@ -18,9 +23,10 @@ function loadPage () {
     setTaskDescription();
     setUpPage();
     showLogs();
+    showPagination();
     addTasksClicks();
     addModalClick();
-
+    
     // Set the default value for the input
     document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
 
@@ -51,7 +57,11 @@ function readLocalStorage () {
 
     if (TaskyPrefLS) {
         // Extract the preferences from the localStorage
-        prefs = JSON.parse(TaskyPrefLS);
+        try {
+            prefs = { ...prefs, ...JSON.parse(TaskyPrefLS) };
+        } catch (error) {
+            console.log(`%cERROR: %cInvalid preferences.`, "color:red;font-weight:800", "");
+        }
     }
 
     // Add a task if we have one on the search query
@@ -98,7 +108,9 @@ function showLogs(){
     if (task) {
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
-        const dateList = dates.map (x => {
+        const pageStats = calcPage();
+        const pageDates = dates.slice(pageStats.min, pageStats.max + 1);
+        const dateList = pageDates.map (x => {
             logDateLabel = dayjs(x).format("MM/DD/YYYY");
             comment = (task[x] && task[x].comment ? task[x].comment : "");
             return logTemplate.supplant({logDate: x, logDateLabel, comment});
@@ -337,17 +349,190 @@ function setLSData() {
 }
 
 // Helper function
+function calcPage() {
+  // Get the highest page number
+  const task = findCurrentTask();
+  const pageMax = Math.max(Math.ceil(task.values.length / prefs.pageSize), 1);
+
+  // Find the current page..
+  let currentPage = prefs.currentPage;
+  if (!currentPage) {
+    currentPage = 1;
+  }
+  if (currentPage > pageMax) {
+    currentPage = pageMax;
+  }
+
+  // Save the current page.
+  savePrefs({ currentPage: currentPage });
+
+  // Find the index of the first and last item to present
+  const min = (currentPage - 1) * prefs.pageSize;
+  const max = Math.min(currentPage * prefs.pageSize, task.values.length) - 1;
+
+  // Now let's calculate the pagination window (for the page toolbar)
+  const halfPageWindow = Math.floor(prefs.pageWindow / 2);
+  let pageWindowMin = Math.max(currentPage - halfPageWindow, 1);
+  let pageWindowMax = Math.min(pageWindowMin + prefs.pageWindow - 1, pageMax);
+
+  // Let's try to keep the widest window we can keep...
+  if (pageWindowMax - pageWindowMin + 1 < prefs.pageWindow) {
+    if (pageWindowMin !== 1 || pageWindowMax !== pageMax) {
+      if (pageWindowMin !== 1) {
+        pageWindowMin = Math.max(1, pageWindowMax - prefs.pageWindow + 1);
+      } else {
+        pageWindowMax = Math.min(pageWindowMin + prefs.pageWindow, pageMax);
+      }
+    }
+  }
+
+  return {
+    currentPage,
+    min,
+    max,
+    length: data.length,
+    breath: max - min + 1, //How many items are we showing?
+    pagination: {
+      pageWindowMin: pageWindowMin,
+      pageWindowMax: pageWindowMax,
+      pageMax,
+      prev: currentPage > 1,
+      next: currentPage < pageMax,
+    },
+  };
+}
+
+function showPagination() {
+
+  const paginators = document.querySelectorAll(".pagination");
+
+  const pageStats = calcPage();
+
+  paginators.forEach((pageButtons) => {
+    while (pageButtons.firstChild) {
+      pageButtons.removeChild(pageButtons.firstChild);
+    }
+    btnInfo = [];
+
+    const ellipsisButtonTemplate = `<div class="page-ellipsis">...</div>`;
+    const inactiveButtonTemplate = `<div class="page-button inactive {classes}">{anchor}</div>`;
+    const activeButtonTemplate = `
+        <div class="page-button {classes}" onclick="gotoPage({gotoPage})">
+          <a href="#">{anchor}</a>
+        </div>`;
+
+    btnInfo.push({
+      anchor: "&lt;&lt;",
+      gotoPage: Math.max(1, pageStats.currentPage - prefs.pageWindow),
+      classes: "",
+      template: pageStats.pagination.prev
+        ? activeButtonTemplate
+        : inactiveButtonTemplate,
+    });
+
+    btnInfo.push({
+      anchor: "&lt;",
+      gotoPage: Math.max(1, pageStats.currentPage - 1),
+      classes: "",
+      template: pageStats.pagination.prev
+        ? activeButtonTemplate
+        : inactiveButtonTemplate,
+    });
+
+    if (pageStats.pagination.pageWindowMin > 1) {
+      btnInfo.push({
+        anchor: "",
+        gotoPage: "",
+        classes: "",
+        template: ellipsisButtonTemplate,
+      });
+    }
+
+    for (
+      let i = pageStats.pagination.pageWindowMin;
+      i <= pageStats.pagination.pageWindowMax;
+      i++
+    ) {
+      btnInfo.push({
+        anchor: i,
+        gotoPage: i,
+        classes: pageStats.currentPage === i ? "current-page" : "",
+        template:
+          pageStats.currentPage === i
+            ? inactiveButtonTemplate
+            : activeButtonTemplate,
+      });
+    }
+
+    if (pageStats.pagination.pageWindowMax < pageStats.pagination.pageMax) {
+      btnInfo.push({
+        anchor: "",
+        gotoPage: "",
+        classes: "",
+        template: ellipsisButtonTemplate,
+      });
+    }
+
+    btnInfo.push({
+      anchor: "&gt;",
+      gotoPage: Math.min(
+        pageStats.pagination.pageMax,
+        pageStats.currentPage + 1
+      ),
+      classes: "",
+      template: pageStats.pagination.next
+        ? activeButtonTemplate
+        : inactiveButtonTemplate,
+    });
+
+    btnInfo.push({
+      anchor: "&gt;&gt;",
+      gotoPage: Math.min(
+        pageStats.pagination.pageMax,
+        pageStats.currentPage + prefs.pageWindow
+      ),
+      classes: "",
+      template: pageStats.pagination.next
+        ? activeButtonTemplate
+        : inactiveButtonTemplate,
+    });
+
+    // Finally, add the buttons
+    const buttons = btnInfo.map((x) => x.template.supplant(x));
+    pageButtons.innerHTML = buttons.join("");
+  });
+}
+
+function gotoPage(pageNumber) {
+  if (pageNumber === undefined) {
+    const lsPageNumber = localStorage.getItem("current_page");
+    pageNumber = lsPageNumber ? parseInt(lsPageNumber) : 1;
+    const pageStats = calcPage();
+    const max = pageStats.pagination.pageMax;
+    if (pageNumber > max) {
+      pageNumber = max;
+    }
+  }
+  savePrefs({ currentPage: pageNumber });
+  itemRedirect(prefs.currentTask);
+}
+
+function changePageSize (pageSize) {
+    savePrefs({ pageSize });
+    itemRedirect(prefs.currentTask);
+}
+
 function saveData () {
     localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
 }
 
-function savePrefs () {
+function savePrefs (prefUpdateObj = {}) {
+    prefs = { ...prefs, ...prefUpdateObj };
     localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(prefs));
 }
 
 function itemRedirect (task) {
-    prefs = { ...prefs, currentTask : task };
-    savePrefs ();
+    savePrefs ({ currentTask : task });
     window.location.reload();
 }
 

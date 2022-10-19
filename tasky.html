@@ -26,6 +26,7 @@
 <body>
 
 <div class="main container">
+    
     <div class="well">
         <div id="task" data-modal="modal-task"></div>
         <div class="delta-last"></div>
@@ -38,11 +39,27 @@
             <button name="btnAddLog" id="btnAddLog" onclick="addLogDate ()">Add</button>
         </div>
     </div>
+
     <div class="task-desc"></div>
+
+    <div class="pagination pagination-top"></div>
+
     <div class="logs"></div>
+
+    <div class="pagination pagination-bottom"></div>
+
+    <div class="items-per-page">
+        <div>Items per pages: </div>
+        <div class="page-size" data-page-size="10" onclick="changePageSize(10)">10</div>
+        <div class="page-size" data-page-size="25" onclick="changePageSize(25)">25</div>
+        <div class="page-size" data-page-size="50" onclick="changePageSize(50)">50</div>
+        <div class="page-size" data-page-size="100" onclick="changePageSize(100)">100</div>
+    </div>
+
     <div class="show-LS-dialog" data-modal="modal-local-storage">
         <a id="openLSData">Show/Set Local Storage</a>
     </div>
+
 </div>
 
 <!-- Log template -->
