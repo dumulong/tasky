@@ -15,11 +15,13 @@ let prefs = {
 };
 let data = []; // The local storage data
 let tasks = []; // List of tasks
+let pagination;
 
 function loadPage () {
 
     readLocalStorage();
     redirectToDefaultTask ();
+    setPagination();
 
     showTaskList();
     addTasksClicks();
@@ -65,6 +67,12 @@ function readLocalStorage () {
     //Finally, sort the task list
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
+}
+
+function setPagination () {
+    const task = findCurrentTask();
+    pagination = new Pagination (prefs.pageSize, prefs.pageWindow);
+    pagination.itemCount = (task ? task.values.length: 0);
 }
 
 function showTaskList () {
@@ -120,8 +128,7 @@ function showLogs(){
     if (task) {
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
-        const pageStats = calcPage();
-        const pageDates = dates.slice(pageStats.min, pageStats.max + 1);
+        const pageDates = dates.slice(pagination.firstItem, pagination.lastItem + 1);
         const dateList = pageDates.map (x => {
             logDateLabel = dayjs(x).format("MM/DD/YYYY");
             comment = (task[x] && task[x].comment ? task[x].comment : "");
@@ -364,26 +371,33 @@ function setLSData() {
 
 class Pagination {
 
-    constructor (totalItemCount, itemPerPage, windowPageAmount) {
+    constructor (itemPerPage, windowPageAmount) {
 
         // Will stay the same while browsing pages
-        this.totalItemCount = totalItemCount;
         this.itemPerPage = itemPerPage;
         this.windowPageAmount = windowPageAmount; // How many page number will be shown
-        this.pageMax = Math.max(Math.ceil(totalItemCount / itemPerPage), 1);
+
+        this.totalItemCount = 0;
+        this.pageMax = 1;
 
         // Changes based on the current page
         this.currentPage = 1;
         this.firstItem = 0
-        this.lastItem = Math.min(totalItemCount, itemPerPage) -1;
+        this.lastItem = 0;
         this.windowPageMin = 1; // Min value on the page number shown
-        this.windowPageMax = Math.min(this.pageMax, windowPageAmount); // Max value on the page number shown
-        this.prev = false; // Can go backward?
-        this.next = this.pageMax > 1; // Can go forward?
+        this.windowPageMax = 1; // Max value on the page number shown
+        this.prev = false; // Can we go backward?
+        this.next = false; // Can we go forward?
 
     }
 
-    setCurrentPage (pageNo) {
+    set itemCount (totalItemCount) {
+        this.totalItemCount = totalItemCount;
+        this.pageMax = Math.max(Math.ceil(totalItemCount / this.itemPerPage), 1);
+        this.page = prefs.currentPage;
+    }
+
+    set page (pageNo) {
         if (pageNo == 0) {
             this.currentPage = 1;
         } else if (pageNo > this.pageMax) {
@@ -392,7 +406,7 @@ class Pagination {
             this.currentPage = pageNo;
         }
         this.firstItem = (this.currentPage - 1) * this.itemPerPage;
-        this.lastItem = Math.min(totalItemCount, this.currentPage * this.itemPerPage) - 1;
+        this.lastItem = Math.min(Math.max(this.totalItemCount,1), this.currentPage * this.itemPerPage) - 1;
 
         // Now let's calculate the pagination window (for the page toolbar)
         const halfPageWindow = Math.floor(this.windowPageAmount / 2);
@@ -419,10 +433,7 @@ class Pagination {
 }
 
 function showPagination() {
-
-  const task = findCurrentTask();
-  const pagination = new Pagination (task.values.length, prefs.pageSize, prefs.pageWindow);
-
+  
   const ellipsisButtonTemplate = `<div class="page-ellipsis">...</div>`;
   const inactiveButtonTemplate = `<div class="page-button inactive {classes}">{anchor}</div>`;
   const activeButtonTemplate = ` <div class="page-button {classes}" onclick="gotoPage({gotoPage})"><a href="#">{anchor}</a></div>`;
@@ -500,11 +511,7 @@ function showPagination() {
 }
 
 function gotoPage(pageNumber) {
-
-  const task = findCurrentTask();
-  const pagination = new Pagination (task.values.length, prefs.pageSize, prefs.pageWindow);
-
-  pagination.setCurrentPage(pageNumber);
+  pagination.page = pageNumber;
   savePrefs({ currentPage: pagination.currentPage });
   itemRedirect(prefs.currentTask);
 }
