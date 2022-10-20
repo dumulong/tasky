@@ -1,4 +1,4 @@
-const unknownTask = "Unknown";
+const unknownTask = "Unknown Task";
 const addTaskSymbol = "\u2795";
 
 const LocalStorageKey = Object.freeze({
@@ -8,7 +8,7 @@ const LocalStorageKey = Object.freeze({
 
 // Define the main variables
 let prefs = {
-    currentTask : "",
+    currentTask : unknownTask,
     currentPage : 1,
     pageSize : 10,
     pageWindow : 5
@@ -19,29 +19,20 @@ let tasks = []; // List of tasks
 function loadPage () {
 
     readLocalStorage();
-    setDefaultTask ();
-    setTaskDescription();
-    setUpPage();
-    showLogs();
-    showPagination();
+    redirectToDefaultTask ();
+
+    showTaskList();
     addTasksClicks();
-    addModalClick();
+    toggleTaskHelp();
 
-    // Set the default value for the input
-    document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
+    showCurrentTask();
 
-    // Show the current task
-    document.querySelector ("#task").innerHTML = prefs.currentTask;
-}
-
-function setUpPage() {
-    if (prefs.currentTask === unknownTask) {
-        document.querySelector(".add-task-help").classList.remove("hidden");
-        document.querySelector(".add-date-div").classList.add("hidden");
-    } else {
-        document.querySelector(".add-task-help").classList.add("hidden");
-        document.querySelector(".add-date-div").classList.remove("hidden");
+    if (prefs.currentTask !== unknownTask) {
+        showLogs();
+        showPagination();
     }
+
+    addModalClick();
 }
 
 function readLocalStorage () {
@@ -64,20 +55,23 @@ function readLocalStorage () {
         }
     }
 
-    // Add a task if we have one on the search query
-    if (prefs.currentTask && !tasks.includes(prefs.currentTask)) {
-        tasks.push(prefs.currentTask);
+    // Add a task to the list if it's not there yet (new task)
+    if (prefs.currentTask !== unknownTask) {
+        if (prefs.currentTask && !tasks.includes(prefs.currentTask)) {
+            tasks.push(prefs.currentTask);
+        }
     }
+
+    //Finally, sort the task list
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-    if (!prefs.currentTask) {
-        prefs.currentTask = tasks[0];
-    }
+}
 
+function showTaskList () {
     //Generate the links
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
 
-    // Add a link for a new task
+    // Add a link for a new task button
     links.push(`<div class="task-link add-task-symbol" data-modal="modal-task">${addTaskSymbol}</div>`);
 
     //Add them to the list
@@ -86,7 +80,7 @@ function readLocalStorage () {
     tasksListDiv.innerHTML = links.join(separatorTemplate);
 }
 
-function setDefaultTask () {
+function redirectToDefaultTask () {
     // If we haven't selected a task yet, show me the first from the list
     if ((prefs.currentTask === unknownTask) && (tasks.length >= 1)) {
         if ((!tasks.includes(unknownTask)) && (tasks[0] !== prefs.currentTask)) {
@@ -95,11 +89,29 @@ function setDefaultTask () {
     }
 }
 
-function setTaskDescription() {
-    const taskDesc = document.querySelector('.task-desc');
-    const task = findCurrentTask();
-    if (task) {
+function showCurrentTask() {
+    // Show the current task
+    const taskTitle = document.querySelector ("#task");
+    taskTitle.innerHTML = prefs.currentTask;
+
+    // Any description?
+    const currentTask = findCurrentTask();
+    if (currentTask) {
+        const taskDesc = document.querySelector('.task-desc');
         taskDesc.innerHTML = task.description || "";
+    }
+
+    // Set the default value for the input
+    document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
+}
+
+function toggleTaskHelp () {
+    if (prefs.currentTask === unknownTask) {
+        document.querySelector(".add-task-help").classList.remove("hidden");
+        document.querySelector(".add-date-div").classList.add("hidden");
+    } else {
+        document.querySelector(".add-task-help").classList.add("hidden");
+        document.querySelector(".add-date-div").classList.remove("hidden");
     }
 }
 
@@ -350,6 +362,7 @@ function setLSData() {
 
 // Helper function
 function calcPage() {
+
   // Get the highest page number
   const task = findCurrentTask();
   const pageMax = Math.max(Math.ceil(task.values.length / prefs.pageSize), 1);
@@ -400,6 +413,62 @@ function calcPage() {
       next: currentPage < pageMax,
     },
   };
+}
+
+class Pagination {
+
+    constructor (totalItemCount, itemPerPage, pageRange) {
+
+        // Will stay the same while browsing pages
+        this.totalItemCount = totalItemCount;
+        this.itemPerPage = itemPerPage;
+        this.pageMax = Math.max(Math.ceil(totalItemCount / itemPerPage), 1);
+        this.pageRange = pageRange; // How many page number will be shown
+
+        // Changes based on the current page
+        this.currentPage = 1;
+        this.firstItem = 0
+        this.lastItem = Math.min(totalItemCount, itemPerPage) -1;
+        this.pageWindowMin = 1; // Min value on the page number shown
+        this.pageWindowMax = Math.min(this.pageMax, pageRange); // Max value on the page number shown
+        this.prev = false; // Can go backward?
+        this.next = this.pageMax > 1; // Can go forward?
+
+    }
+
+    setCurrentPage (pageNo) {
+        if (pageNo == 0) {
+            this.currentPage = 1;
+        } else if (pageNo > this.pageMax) {
+            this.currentPage = this.pageMax;
+        } else {
+            this.currentPage = pageNo;
+        }
+        this.firstItem = (this.currentPage - 1) * this.itemPerPage;
+        this.lastItem = Math.min(totalItemCount, this.currentPage * this.itemPerPage) - 1;
+
+        // Now let's calculate the pagination window (for the page toolbar)
+        const halfPageWindow = Math.floor(this.pageRange / 2);
+        this.pageWindowMin = Math.max(this.currentPage - halfPageWindow, 1);
+        this.pageWindowMax = Math.min(this.pageWindowMin + this.pageRange - 1, this.pageMax);
+
+        // Let's try to keep the widest window we can keep...
+        if (this.pageWindowMax - this.pageWindowMin + 1 < this.pageRange) {
+            if (this.pageWindowMin !== 1 || this.pageWindowMax !== this.pageMax) {
+                if (this.pageWindowMin !== 1) {
+                    this.pageWindowMin = Math.max(1, this.pageWindowMax - this.pageRange + 1);
+                } else {
+                    this.pageWindowMax = Math.min(this.pageWindowMin + this.pageRange, this.pageMax);
+                }
+            }
+        }
+
+        // Can we move forward and backward?
+        this.prev = this.currentPage > 1;
+        this.next = this.currentPage < this.pageMax;
+
+    }
+
 }
 
 function showPagination() {
