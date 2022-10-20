@@ -405,6 +405,11 @@ class Pagination {
         } else {
             this.currentPage = pageNo;
         }
+        this.recalculate();
+    }
+
+    recalculate (itemPerPage = this.itemPerPage) {
+        this.itemPerPage = itemPerPage;
         this.firstItem = (this.currentPage - 1) * this.itemPerPage;
         this.lastItem = Math.min(Math.max(this.totalItemCount,1), this.currentPage * this.itemPerPage) - 1;
 
@@ -426,9 +431,8 @@ class Pagination {
 
         // Can we move forward and backward?
         this.prev = this.currentPage > 1;
-        this.next = this.currentPage < this.pageMax;
-
-    }
+        this.next = this.currentPage < this.pageMax;        
+    }    
 
 }
 
@@ -441,10 +445,6 @@ function showPagination() {
   const paginators = document.querySelectorAll(".pagination");
 
   paginators.forEach((pageButtons) => {
-
-    while (pageButtons.firstChild) {
-      pageButtons.removeChild(pageButtons.firstChild);
-    }
 
     const btnInfo = [];
 
@@ -514,12 +514,16 @@ function gotoPage(pageNumber) {
   pagination.page = pageNumber;
   prefs.currentPage = pagination.currentPage;
   savePrefs({ currentPage: pagination.currentPage });
+  showPagination();
   showLogs ();
 }
 
 function changePageSize (pageSize) {
     prefs.pageSize = pageSize;
-    savePrefs({ pageSize });
+    prefs.currentPage = 1;
+    pagination.recalculate(pageSize);
+    savePrefs({ pageSize, currentPage : 1 });
+    showPagination();
     showLogs ();
 }
 
