@@ -24,43 +24,42 @@
 </head>
 
 <body>
-
-<div class="main container">
     
-    <div class="well">
-        <div id="task" data-modal="modal-task"></div>
-        <div class="delta-last"></div>
-        <div id="tasksList"></div>
-        <div class="add-task-help hidden">
-            Please click on the plus sign to add a task.
-        </div>
-        <div class="add-date-div">
-            <input name="selectDate" id="selectDate" value="" />
-            <button name="btnAddLog" id="btnAddLog" onclick="addLogDate ()">Add</button>
-        </div>
+<header class="well">
+    <div id="task" data-modal="modal-task"></div>
+    <time class="delta-last"></time>
+    <nav id="tasksList"></nav>
+    <div class="add-task-help hidden">
+        Please click on the plus sign to add a task.
     </div>
+    <div class="add-date-div">
+        <input name="selectDate" id="selectDate" value="" />
+        <button name="btnAddLog" id="btnAddLog" onclick="addLogDate ()">Add</button>
+    </div>
+</header>
 
+<main>
     <div class="task-desc"></div>
 
-    <div class="pagination pagination-top"></div>
+    <nav class="pagination pagination-top"></nav>
 
-    <div class="logs"></div>
+    <section class="logs"></section>
 
-    <div class="pagination pagination-bottom"></div>
+    <nav class="pagination pagination-bottom"></nav>
 
-    <div class="items-per-page">
+    <nav class="items-per-page">
         <div>Items per pages: </div>
         <div class="page-size" data-page-size="10" onclick="changePageSize(10)">10</div>
         <div class="page-size" data-page-size="25" onclick="changePageSize(25)">25</div>
         <div class="page-size" data-page-size="50" onclick="changePageSize(50)">50</div>
         <div class="page-size" data-page-size="100" onclick="changePageSize(100)">100</div>
-    </div>
+    </nav>
+</main>
 
-    <div class="show-LS-dialog" data-modal="modal-local-storage">
-        <a id="openLSData">Show/Set Local Storage</a>
-    </div>
+<footer class="show-LS-dialog" data-modal="modal-local-storage">
+    <a id="openLSData">Show/Set Local Storage</a>
+</footer>
 
-</div>
 
 <!-- Log template -->
 <script id="log-template" type="text/template">

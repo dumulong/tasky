@@ -21,7 +21,7 @@ function loadPage () {
 
     readLocalStorage();
     redirectToDefaultTask ();
-    setPagination();
+    initPagination();
 
     showTaskList();
     addTasksClicks();
@@ -69,10 +69,9 @@ function readLocalStorage () {
 
 }
 
-function setPagination () {
+function initPagination () {
     const task = findCurrentTask();
     pagination = new Pagination (prefs.pageSize, prefs.pageWindow);
-    pagination.itemCount = (task ? task.values.length: 0);
 }
 
 function showTaskList () {
@@ -126,6 +125,8 @@ function toggleTaskHelp () {
 function showLogs(){
     const task = findCurrentTask();
     if (task) {
+        pagination.itemCount = (task ? task.values.length: 0);
+        pagination.page = prefs.currentPage;
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
         const pageDates = dates.slice(pagination.firstItem, pagination.lastItem + 1);
@@ -186,7 +187,7 @@ function addLogDate () {
         }
     }
     saveData ();
-    itemRedirect(prefs.currentTask);
+    showLogs();
 }
 
 function saveLog () {
@@ -201,28 +202,27 @@ function saveLog () {
     }
     task[logEntry].comment = editLogComment.value;
     saveData ();
-    itemRedirect(prefs.currentTask);
+    showLogs();
 }
 
 function deleteLog () {
     const taskNdx = data.findIndex (x => x.task === prefs.currentTask);
     const task = data[taskNdx];
-    let redirectTo = prefs.currentTask;
 
     const editLogDate = document.querySelector('#editLogDate');
     const logDate = editLogDate.innerHTML;
 
     if (task.values.length === 1) {
         data.splice(taskNdx, 1);
-        redirectTo = "";
+        saveData ();
+        itemRedirect("");
     } else {
         const logEntry = dayjs(logDate).format("YYYYMMDD");
         task.values = task.values.filter(x => x !== logEntry);
         delete task[logEntry];
-        redirectTo = prefs.currentTask;
+        saveData ();
+        showLogs ();
     }
-    saveData ();
-    itemRedirect(redirectTo);
 }
 
 function addNewTask () {
@@ -239,8 +239,8 @@ function updateTask () {
         task.task = taskInput.value;
         task.description = taskDescInput.value;
         saveData ();
+        showLogs ();
     }
-    itemRedirect(taskInput.value);
 }
 
 function addTasksClicks () {
@@ -512,13 +512,15 @@ function showPagination() {
 
 function gotoPage(pageNumber) {
   pagination.page = pageNumber;
+  prefs.currentPage = pagination.currentPage;
   savePrefs({ currentPage: pagination.currentPage });
-  itemRedirect(prefs.currentTask);
+  showLogs ();
 }
 
 function changePageSize (pageSize) {
+    prefs.pageSize = pageSize;
     savePrefs({ pageSize });
-    itemRedirect(prefs.currentTask);
+    showLogs ();
 }
 
 function saveData () {

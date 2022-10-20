@@ -48,13 +48,6 @@ button {
   display: none !important;
 }
 
-.container {
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: space-around;
-  align-items: stretch;
-}
-
 .well {
   display: flex;
   flex-flow: column nowrap;
