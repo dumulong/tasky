@@ -24,7 +24,7 @@
 </head>
 
 <body>
-    
+
 <header class="well">
     <div id="task" data-modal="modal-task"></div>
     <time class="delta-last"></time>
@@ -56,8 +56,8 @@
     </nav>
 </main>
 
-<footer class="show-LS-dialog" data-modal="modal-local-storage">
-    <a id="openLSData">Show/Set Local Storage</a>
+<footer>
+    <a id="openLSData" class="show-LS-dialog" data-modal="modal-local-storage">Show/Set Local Storage</a>
 </footer>
 
 
@@ -101,7 +101,7 @@
                 <textarea name="taskDesc" id="taskDesc"  cols="30" rows="4" value=""></textarea>
             </div>
             <div class="modal-button-group">
-                <button name="btnAddTask" id="btnAddTask" onclick="addNewTask ()">Add</button>
+                <button name="btnAddTask" id="btnAddTask" onclick="addTask ()">Add</button>
                 <button name="btnUpdateTask" id="btnUpdateTask" onclick="updateTask ()">Update</button>
                 <button name="btnCancelTask" id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
             </div>

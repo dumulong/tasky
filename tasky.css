@@ -155,7 +155,7 @@ button {
 }
 
 .show-LS-dialog {
-  margin: 20px;
+  margin-top: 20px;
   color: hsl(0, 0%, 80%);
   font-size: 1.4rem;
   font-style: italic;

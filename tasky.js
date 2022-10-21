@@ -129,6 +129,15 @@ function showLogs(){
         pagination.page = prefs.currentPage;
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
+
+        // Show the delta for the last entry
+        if (dates.length > 0) {
+          const lastDate = dayjs(dates[0]);
+          const deltaLast = `Latest entry: ${calcDeltaDate(lastDate)}`;
+          document.querySelector (".delta-last").innerHTML = deltaLast;
+        }
+
+        // Add the logs, refresh the clicks
         const pageDates = dates.slice(pagination.firstItem, pagination.lastItem + 1);
         const dateList = pageDates.map (x => {
             logDateLabel = dayjs(x).format("MM/DD/YYYY");
@@ -136,12 +145,7 @@ function showLogs(){
             return logTemplate.supplant({logDate: x, logDateLabel, comment});
         })
         document.querySelector (".logs").innerHTML = dateList.join("");
-
-        if (dates.length > 0) {
-            const lastDate = dayjs(dates[0]);
-            const deltaLast = `Latest entry: ${calcDeltaDate(lastDate)}`;
-            document.querySelector (".delta-last").innerHTML = deltaLast;
-        }
+        refreshLogClick();
 
     } else {
         if (prefs.currentTask !== unknownTask) {
@@ -188,6 +192,7 @@ function addLogDate () {
     }
     saveData ();
     showLogs();
+    closeAllModal();
 }
 
 function saveLog () {
@@ -203,6 +208,7 @@ function saveLog () {
     task[logEntry].comment = editLogComment.value;
     saveData ();
     showLogs();
+    closeAllModal();
 }
 
 function deleteLog () {
@@ -222,10 +228,20 @@ function deleteLog () {
         delete task[logEntry];
         saveData ();
         showLogs ();
+        closeAllModal();
     }
 }
 
-function addNewTask () {
+function refreshLogClick () {
+
+  const modals = document.querySelectorAll('[data-modal="modal-edit-log"]');
+
+  modals.forEach(trigger => {
+    trigger.addEventListener('click', openModal);
+  });
+}
+
+function addTask () {
     const taskInput = document.querySelector("[name=newTaskName]");
     itemRedirect(taskInput.value);
 }
@@ -238,10 +254,10 @@ function updateTask () {
     if (task) {
         task.task = taskInput.value;
         task.description = taskDescInput.value;
-        showCurrentTask()
+        showCurrentTask();
         saveData ();
-        showLogs ();
     }
+    closeAllModal();
 }
 
 function addTasksClicks () {
@@ -326,25 +342,27 @@ function addModalClick () {
     const modals = document.querySelectorAll('[data-modal]');
 
     modals.forEach(trigger => {
-      trigger.addEventListener('click', event => {
-        event.preventDefault();
-        const modal = document.getElementById(trigger.dataset.modal);
-
-        const preLoadFnc = modal.dataset.preLoadFnc;
-        if (preLoadFnc && modalFnc[preLoadFnc]) {
-            modalFnc[preLoadFnc](event);
-        }
-
-        modal.classList.add('open');
-        const exits = modal.querySelectorAll('.modal-exit');
-        exits.forEach(exit => {
-          exit.addEventListener('click', event => {
-            event.preventDefault();
-            modal.classList.remove('open');
-          });
-        });
-      });
+      trigger.addEventListener('click', openModal);
     });
+}
+
+function openModal (event) {
+  event.preventDefault();
+  const modal = document.getElementById(event.target.dataset.modal);
+
+  const preLoadFnc = modal.dataset.preLoadFnc;
+  if (preLoadFnc && modalFnc[preLoadFnc]) {
+      modalFnc[preLoadFnc](event);
+  }
+
+  modal.classList.add('open');
+  const exits = modal.querySelectorAll('.modal-exit');
+  exits.forEach(exit => {
+    exit.addEventListener('click', event => {
+      event.preventDefault();
+      modal.classList.remove('open');
+    });
+  });
 }
 
 function closeAllModal () {
@@ -361,7 +379,7 @@ function setLSData() {
     try {
         data = JSON.parse(lsDataTextarea.value);
         saveData ();
-        itemRedirect("");
+        itemRedirect(unknownTask);
     } catch (error) {
         lsDataTextarea.classList.add("invalid");
         console.log(`%cERROR: %cInvalid data.`, "color:red;font-weight:800", "");
