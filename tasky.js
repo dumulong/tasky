@@ -513,7 +513,7 @@ function showPagination() {
 }
 
 function gotoPage(pageNumber) {
-  updatePrefs({ currentPage: pagination.currentPage });
+  updatePrefs({ currentPage: pageNumber });
   pagination.page = pageNumber;
   showPagination();
   showLogs ();
