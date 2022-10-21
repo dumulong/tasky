@@ -73,6 +73,7 @@ button {
 }
 
 #tasksList div {
+  padding: 0 10px;
   padding: 0 0.8rem;
 }
 
@@ -89,6 +90,7 @@ button {
 }
 
 .task-desc {
+  padding: 0 10px;
   margin-top: 4px;
   color: hsl(0, 45%, 45%);
 }

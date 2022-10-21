@@ -105,7 +105,7 @@ function showCurrentTask() {
     const currentTask = findCurrentTask();
     if (currentTask) {
         const taskDesc = document.querySelector('.task-desc');
-        taskDesc.innerHTML = task.description || "";
+        taskDesc.innerHTML = currentTask.description || "";
     }
 
     // Set the default value for the input
@@ -238,6 +238,7 @@ function updateTask () {
     if (task) {
         task.task = taskInput.value;
         task.description = taskDescInput.value;
+        showCurrentTask()
         saveData ();
         showLogs ();
     }
@@ -378,7 +379,7 @@ class Pagination {
         this.windowPageAmount = windowPageAmount; // How many page number will be shown
 
         this.totalItemCount = 0;
-        this.pageMax = 1;
+        this.maxPageNumber = 1;
 
         // Changes based on the current page
         this.currentPage = 1;
@@ -393,15 +394,15 @@ class Pagination {
 
     set itemCount (totalItemCount) {
         this.totalItemCount = totalItemCount;
-        this.pageMax = Math.max(Math.ceil(totalItemCount / this.itemPerPage), 1);
+        this.maxPageNumber = Math.max(Math.ceil(totalItemCount / this.itemPerPage), 1);
         this.page = prefs.currentPage;
     }
 
     set page (pageNo) {
         if (pageNo == 0) {
             this.currentPage = 1;
-        } else if (pageNo > this.pageMax) {
-            this.currentPage = this.pageMax;
+        } else if (pageNo > this.maxPageNumber) {
+            this.currentPage = this.maxPageNumber;
         } else {
             this.currentPage = pageNo;
         }
@@ -410,34 +411,35 @@ class Pagination {
 
     recalculate (itemPerPage = this.itemPerPage) {
         this.itemPerPage = itemPerPage;
+        this.maxPageNumber = Math.max(Math.ceil(this.totalItemCount / this.itemPerPage), 1);
         this.firstItem = (this.currentPage - 1) * this.itemPerPage;
         this.lastItem = Math.min(Math.max(this.totalItemCount,1), this.currentPage * this.itemPerPage) - 1;
 
         // Now let's calculate the pagination window (for the page toolbar)
         const halfPageWindow = Math.floor(this.windowPageAmount / 2);
         this.windowPageMin = Math.max(this.currentPage - halfPageWindow, 1);
-        this.windowPageMax = Math.min(this.windowPageMin + this.windowPageAmount - 1, this.pageMax);
+        this.windowPageMax = Math.min(this.windowPageMin + this.windowPageAmount - 1, this.maxPageNumber);
 
         // Let's try to keep the widest window we can keep...
         if (this.windowPageMax - this.windowPageMin + 1 < this.windowPageAmount) {
-            if (this.windowPageMin !== 1 || this.windowPageMax !== this.pageMax) {
+            if (this.windowPageMin !== 1 || this.windowPageMax !== this.maxPageNumber) {
                 if (this.windowPageMin !== 1) {
                     this.windowPageMin = Math.max(1, this.windowPageMax - this.windowPageAmount + 1);
                 } else {
-                    this.windowPageMax = Math.min(this.windowPageMin + this.windowPageAmount, this.pageMax);
+                    this.windowPageMax = Math.min(this.windowPageMin + this.windowPageAmount, this.maxPageNumber);
                 }
             }
         }
 
         // Can we move forward and backward?
         this.prev = this.currentPage > 1;
-        this.next = this.currentPage < this.pageMax;        
-    }    
+        this.next = this.currentPage < this.maxPageNumber;
+    }
 
 }
 
 function showPagination() {
-  
+
   const ellipsisButtonTemplate = `<div class="page-ellipsis">...</div>`;
   const inactiveButtonTemplate = `<div class="page-button inactive {classes}">{anchor}</div>`;
   const activeButtonTemplate = ` <div class="page-button {classes}" onclick="gotoPage({gotoPage})"><a href="#">{anchor}</a></div>`;
@@ -480,7 +482,7 @@ function showPagination() {
       });
     }
 
-    if (pagination.windowPageMax < pagination.pageMax) {
+    if (pagination.windowPageMax < pagination.maxPageNumber) {
       btnInfo.push({
         anchor: "",
         gotoPage: "",
@@ -491,14 +493,14 @@ function showPagination() {
 
     btnInfo.push({
       anchor: "&gt;",
-      gotoPage: Math.min( pagination.pageMax, pagination.currentPage + 1 ),
+      gotoPage: Math.min( pagination.maxPageNumber, pagination.currentPage + 1 ),
       classes: "",
       template: pagination.next ? activeButtonTemplate : inactiveButtonTemplate,
     });
 
     btnInfo.push({
       anchor: "&gt;&gt;",
-      gotoPage: Math.min( pagination.pageMax, pagination.currentPage + pagination.windowPageAmount),
+      gotoPage: Math.min( pagination.maxPageNumber, pagination.currentPage + pagination.windowPageAmount),
       classes: "",
       template: pagination.next ? activeButtonTemplate : inactiveButtonTemplate,
     });
@@ -511,18 +513,15 @@ function showPagination() {
 }
 
 function gotoPage(pageNumber) {
+  updatePrefs({ currentPage: pagination.currentPage });
   pagination.page = pageNumber;
-  prefs.currentPage = pagination.currentPage;
-  savePrefs({ currentPage: pagination.currentPage });
   showPagination();
   showLogs ();
 }
 
 function changePageSize (pageSize) {
-    prefs.pageSize = pageSize;
-    prefs.currentPage = 1;
+    updatePrefs({ pageSize, currentPage : 1 });
     pagination.recalculate(pageSize);
-    savePrefs({ pageSize, currentPage : 1 });
     showPagination();
     showLogs ();
 }
@@ -531,13 +530,13 @@ function saveData () {
     localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
 }
 
-function savePrefs (prefUpdateObj = {}) {
+function updatePrefs (prefUpdateObj = {}) {
     prefs = { ...prefs, ...prefUpdateObj };
     localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(prefs));
 }
 
 function itemRedirect (task) {
-    savePrefs ({ currentTask : task });
+    updatePrefs ({ currentTask : task });
     window.location.reload();
 }
 
