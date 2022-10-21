@@ -562,6 +562,21 @@ function findCurrentTask () {
     return data.find (x => x.task === prefs.currentTask);
 }
 
+function copyLSData() {
+    // Get the text field
+    const lsDataTextarea = document.querySelector("#lsData");
+
+    // Select the text field
+    lsDataTextarea.select();
+    lsDataTextarea.setSelectionRange(0, 99999); // For mobile devices
+
+     // Copy the text inside the text field
+    navigator.clipboard.writeText(lsDataTextarea.value);
+
+    // Alert the copied text
+    alert("Copied to Clipboard!");
+  }
+
 // Helper function: given an object o, replace {var} with value of property o.var for any string
 String.prototype.supplant = function (o) {
     return this.replace(
