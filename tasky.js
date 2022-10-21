@@ -1,4 +1,4 @@
-const unknownTask = "Unknown";
+const unknownTask = "Unknown Task";
 const addTaskSymbol = "\u2795";
 
 const LocalStorageKey = Object.freeze({
@@ -8,40 +8,33 @@ const LocalStorageKey = Object.freeze({
 
 // Define the main variables
 let prefs = {
-    currentTask : "",
+    currentTask : unknownTask,
     currentPage : 1,
     pageSize : 10,
     pageWindow : 5
 };
 let data = []; // The local storage data
 let tasks = []; // List of tasks
+let pagination;
 
 function loadPage () {
 
     readLocalStorage();
-    setDefaultTask ();
-    setTaskDescription();
-    setUpPage();
-    showLogs();
-    showPagination();
+    redirectToDefaultTask ();
+    initPagination();
+
+    showTaskList();
     addTasksClicks();
-    addModalClick();
+    toggleTaskHelp();
 
-    // Set the default value for the input
-    document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
+    showCurrentTask();
 
-    // Show the current task
-    document.querySelector ("#task").innerHTML = prefs.currentTask;
-}
-
-function setUpPage() {
-    if (prefs.currentTask === unknownTask) {
-        document.querySelector(".add-task-help").classList.remove("hidden");
-        document.querySelector(".add-date-div").classList.add("hidden");
-    } else {
-        document.querySelector(".add-task-help").classList.add("hidden");
-        document.querySelector(".add-date-div").classList.remove("hidden");
+    if (prefs.currentTask !== unknownTask) {
+        showLogs();
+        showPagination();
     }
+
+    addModalClick();
 }
 
 function readLocalStorage () {
@@ -64,20 +57,28 @@ function readLocalStorage () {
         }
     }
 
-    // Add a task if we have one on the search query
-    if (prefs.currentTask && !tasks.includes(prefs.currentTask)) {
-        tasks.push(prefs.currentTask);
+    // Add a task to the list if it's not there yet (new task)
+    if (prefs.currentTask !== unknownTask) {
+        if (prefs.currentTask && !tasks.includes(prefs.currentTask)) {
+            tasks.push(prefs.currentTask);
+        }
     }
+
+    //Finally, sort the task list
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-    if (!prefs.currentTask) {
-        prefs.currentTask = tasks[0];
-    }
+}
 
+function initPagination () {
+    const task = findCurrentTask();
+    pagination = new Pagination (prefs.pageSize, prefs.pageWindow);
+}
+
+function showTaskList () {
     //Generate the links
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
 
-    // Add a link for a new task
+    // Add a link for a new task button
     links.push(`<div class="task-link add-task-symbol" data-modal="modal-task">${addTaskSymbol}</div>`);
 
     //Add them to the list
@@ -86,7 +87,7 @@ function readLocalStorage () {
     tasksListDiv.innerHTML = links.join(separatorTemplate);
 }
 
-function setDefaultTask () {
+function redirectToDefaultTask () {
     // If we haven't selected a task yet, show me the first from the list
     if ((prefs.currentTask === unknownTask) && (tasks.length >= 1)) {
         if ((!tasks.includes(unknownTask)) && (tasks[0] !== prefs.currentTask)) {
@@ -95,21 +96,40 @@ function setDefaultTask () {
     }
 }
 
-function setTaskDescription() {
-    const taskDesc = document.querySelector('.task-desc');
-    const task = findCurrentTask();
-    if (task) {
-        taskDesc.innerHTML = task.description || "";
+function showCurrentTask() {
+    // Show the current task
+    const taskTitle = document.querySelector ("#task");
+    taskTitle.innerHTML = prefs.currentTask;
+
+    // Any description?
+    const currentTask = findCurrentTask();
+    if (currentTask) {
+        const taskDesc = document.querySelector('.task-desc');
+        taskDesc.innerHTML = currentTask.description || "";
+    }
+
+    // Set the default value for the input
+    document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
+}
+
+function toggleTaskHelp () {
+    if (prefs.currentTask === unknownTask) {
+        document.querySelector(".add-task-help").classList.remove("hidden");
+        document.querySelector(".add-date-div").classList.add("hidden");
+    } else {
+        document.querySelector(".add-task-help").classList.add("hidden");
+        document.querySelector(".add-date-div").classList.remove("hidden");
     }
 }
 
 function showLogs(){
     const task = findCurrentTask();
     if (task) {
+        pagination.itemCount = (task ? task.values.length: 0);
+        pagination.page = prefs.currentPage;
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
-        const pageStats = calcPage();
-        const pageDates = dates.slice(pageStats.min, pageStats.max + 1);
+        const pageDates = dates.slice(pagination.firstItem, pagination.lastItem + 1);
         const dateList = pageDates.map (x => {
             logDateLabel = dayjs(x).format("MM/DD/YYYY");
             comment = (task[x] && task[x].comment ? task[x].comment : "");
@@ -167,7 +187,7 @@ function addLogDate () {
         }
     }
     saveData ();
-    itemRedirect(prefs.currentTask);
+    showLogs();
 }
 
 function saveLog () {
@@ -182,28 +202,27 @@ function saveLog () {
     }
     task[logEntry].comment = editLogComment.value;
     saveData ();
-    itemRedirect(prefs.currentTask);
+    showLogs();
 }
 
 function deleteLog () {
     const taskNdx = data.findIndex (x => x.task === prefs.currentTask);
     const task = data[taskNdx];
-    let redirectTo = prefs.currentTask;
 
     const editLogDate = document.querySelector('#editLogDate');
     const logDate = editLogDate.innerHTML;
 
     if (task.values.length === 1) {
         data.splice(taskNdx, 1);
-        redirectTo = "";
+        saveData ();
+        itemRedirect("");
     } else {
         const logEntry = dayjs(logDate).format("YYYYMMDD");
         task.values = task.values.filter(x => x !== logEntry);
         delete task[logEntry];
-        redirectTo = prefs.currentTask;
+        saveData ();
+        showLogs ();
     }
-    saveData ();
-    itemRedirect(redirectTo);
 }
 
 function addNewTask () {
@@ -219,9 +238,10 @@ function updateTask () {
     if (task) {
         task.task = taskInput.value;
         task.description = taskDescInput.value;
+        showCurrentTask()
         saveData ();
+        showLogs ();
     }
-    itemRedirect(taskInput.value);
 }
 
 function addTasksClicks () {
@@ -349,97 +369,102 @@ function setLSData() {
 }
 
 // Helper function
-function calcPage() {
-  // Get the highest page number
-  const task = findCurrentTask();
-  const pageMax = Math.max(Math.ceil(task.values.length / prefs.pageSize), 1);
 
-  // Find the current page..
-  let currentPage = prefs.currentPage;
-  if (!currentPage) {
-    currentPage = 1;
-  }
-  if (currentPage > pageMax) {
-    currentPage = pageMax;
-  }
+class Pagination {
 
-  // Save the current page.
-  savePrefs({ currentPage: currentPage });
+    constructor (itemPerPage, windowPageAmount) {
 
-  // Find the index of the first and last item to present
-  const min = (currentPage - 1) * prefs.pageSize;
-  const max = Math.min(currentPage * prefs.pageSize, task.values.length) - 1;
+        // Will stay the same while browsing pages
+        this.itemPerPage = itemPerPage;
+        this.windowPageAmount = windowPageAmount; // How many page number will be shown
 
-  // Now let's calculate the pagination window (for the page toolbar)
-  const halfPageWindow = Math.floor(prefs.pageWindow / 2);
-  let pageWindowMin = Math.max(currentPage - halfPageWindow, 1);
-  let pageWindowMax = Math.min(pageWindowMin + prefs.pageWindow - 1, pageMax);
+        this.totalItemCount = 0;
+        this.maxPageNumber = 1;
 
-  // Let's try to keep the widest window we can keep...
-  if (pageWindowMax - pageWindowMin + 1 < prefs.pageWindow) {
-    if (pageWindowMin !== 1 || pageWindowMax !== pageMax) {
-      if (pageWindowMin !== 1) {
-        pageWindowMin = Math.max(1, pageWindowMax - prefs.pageWindow + 1);
-      } else {
-        pageWindowMax = Math.min(pageWindowMin + prefs.pageWindow, pageMax);
-      }
+        // Changes based on the current page
+        this.currentPage = 1;
+        this.firstItem = 0
+        this.lastItem = 0;
+        this.windowPageMin = 1; // Min value on the page number shown
+        this.windowPageMax = 1; // Max value on the page number shown
+        this.prev = false; // Can we go backward?
+        this.next = false; // Can we go forward?
+
     }
-  }
 
-  return {
-    currentPage,
-    min,
-    max,
-    length: data.length,
-    breath: max - min + 1, //How many items are we showing?
-    pagination: {
-      pageWindowMin: pageWindowMin,
-      pageWindowMax: pageWindowMax,
-      pageMax,
-      prev: currentPage > 1,
-      next: currentPage < pageMax,
-    },
-  };
+    set itemCount (totalItemCount) {
+        this.totalItemCount = totalItemCount;
+        this.maxPageNumber = Math.max(Math.ceil(totalItemCount / this.itemPerPage), 1);
+        this.page = prefs.currentPage;
+    }
+
+    set page (pageNo) {
+        if (pageNo == 0) {
+            this.currentPage = 1;
+        } else if (pageNo > this.maxPageNumber) {
+            this.currentPage = this.maxPageNumber;
+        } else {
+            this.currentPage = pageNo;
+        }
+        this.recalculate();
+    }
+
+    recalculate (itemPerPage = this.itemPerPage) {
+        this.itemPerPage = itemPerPage;
+        this.maxPageNumber = Math.max(Math.ceil(this.totalItemCount / this.itemPerPage), 1);
+        this.firstItem = (this.currentPage - 1) * this.itemPerPage;
+        this.lastItem = Math.min(Math.max(this.totalItemCount,1), this.currentPage * this.itemPerPage) - 1;
+
+        // Now let's calculate the pagination window (for the page toolbar)
+        const halfPageWindow = Math.floor(this.windowPageAmount / 2);
+        this.windowPageMin = Math.max(this.currentPage - halfPageWindow, 1);
+        this.windowPageMax = Math.min(this.windowPageMin + this.windowPageAmount - 1, this.maxPageNumber);
+
+        // Let's try to keep the widest window we can keep...
+        if (this.windowPageMax - this.windowPageMin + 1 < this.windowPageAmount) {
+            if (this.windowPageMin !== 1 || this.windowPageMax !== this.maxPageNumber) {
+                if (this.windowPageMin !== 1) {
+                    this.windowPageMin = Math.max(1, this.windowPageMax - this.windowPageAmount + 1);
+                } else {
+                    this.windowPageMax = Math.min(this.windowPageMin + this.windowPageAmount, this.maxPageNumber);
+                }
+            }
+        }
+
+        // Can we move forward and backward?
+        this.prev = this.currentPage > 1;
+        this.next = this.currentPage < this.maxPageNumber;
+    }
+
 }
 
 function showPagination() {
 
+  const ellipsisButtonTemplate = `<div class="page-ellipsis">...</div>`;
+  const inactiveButtonTemplate = `<div class="page-button inactive {classes}">{anchor}</div>`;
+  const activeButtonTemplate = ` <div class="page-button {classes}" onclick="gotoPage({gotoPage})"><a href="#">{anchor}</a></div>`;
+
   const paginators = document.querySelectorAll(".pagination");
 
-  const pageStats = calcPage();
-
   paginators.forEach((pageButtons) => {
-    while (pageButtons.firstChild) {
-      pageButtons.removeChild(pageButtons.firstChild);
-    }
-    btnInfo = [];
 
-    const ellipsisButtonTemplate = `<div class="page-ellipsis">...</div>`;
-    const inactiveButtonTemplate = `<div class="page-button inactive {classes}">{anchor}</div>`;
-    const activeButtonTemplate = `
-        <div class="page-button {classes}" onclick="gotoPage({gotoPage})">
-          <a href="#">{anchor}</a>
-        </div>`;
+    const btnInfo = [];
 
     btnInfo.push({
       anchor: "&lt;&lt;",
-      gotoPage: Math.max(1, pageStats.currentPage - prefs.pageWindow),
+      gotoPage: Math.max(1, pagination.currentPage - pagination.windowPageAmount),
       classes: "",
-      template: pageStats.pagination.prev
-        ? activeButtonTemplate
-        : inactiveButtonTemplate,
+      template: pagination.prev ? activeButtonTemplate : inactiveButtonTemplate,
     });
 
     btnInfo.push({
       anchor: "&lt;",
-      gotoPage: Math.max(1, pageStats.currentPage - 1),
+      gotoPage: Math.max(1, pagination.currentPage - 1),
       classes: "",
-      template: pageStats.pagination.prev
-        ? activeButtonTemplate
-        : inactiveButtonTemplate,
+      template: pagination.prev ? activeButtonTemplate : inactiveButtonTemplate,
     });
 
-    if (pageStats.pagination.pageWindowMin > 1) {
+    if (pagination.windowPageMin > 1) {
       btnInfo.push({
         anchor: "",
         gotoPage: "",
@@ -448,23 +473,16 @@ function showPagination() {
       });
     }
 
-    for (
-      let i = pageStats.pagination.pageWindowMin;
-      i <= pageStats.pagination.pageWindowMax;
-      i++
-    ) {
+    for (let i = pagination.windowPageMin; i <= pagination.windowPageMax; i++) {
       btnInfo.push({
         anchor: i,
         gotoPage: i,
-        classes: pageStats.currentPage === i ? "current-page" : "",
-        template:
-          pageStats.currentPage === i
-            ? inactiveButtonTemplate
-            : activeButtonTemplate,
+        classes: pagination.currentPage === i ? "current-page" : "",
+        template: pagination.currentPage === i ? inactiveButtonTemplate : activeButtonTemplate,
       });
     }
 
-    if (pageStats.pagination.pageWindowMax < pageStats.pagination.pageMax) {
+    if (pagination.windowPageMax < pagination.maxPageNumber) {
       btnInfo.push({
         anchor: "",
         gotoPage: "",
@@ -475,64 +493,50 @@ function showPagination() {
 
     btnInfo.push({
       anchor: "&gt;",
-      gotoPage: Math.min(
-        pageStats.pagination.pageMax,
-        pageStats.currentPage + 1
-      ),
+      gotoPage: Math.min( pagination.maxPageNumber, pagination.currentPage + 1 ),
       classes: "",
-      template: pageStats.pagination.next
-        ? activeButtonTemplate
-        : inactiveButtonTemplate,
+      template: pagination.next ? activeButtonTemplate : inactiveButtonTemplate,
     });
 
     btnInfo.push({
       anchor: "&gt;&gt;",
-      gotoPage: Math.min(
-        pageStats.pagination.pageMax,
-        pageStats.currentPage + prefs.pageWindow
-      ),
+      gotoPage: Math.min( pagination.maxPageNumber, pagination.currentPage + pagination.windowPageAmount),
       classes: "",
-      template: pageStats.pagination.next
-        ? activeButtonTemplate
-        : inactiveButtonTemplate,
+      template: pagination.next ? activeButtonTemplate : inactiveButtonTemplate,
     });
 
     // Finally, add the buttons
     const buttons = btnInfo.map((x) => x.template.supplant(x));
     pageButtons.innerHTML = buttons.join("");
+
   });
 }
 
 function gotoPage(pageNumber) {
-  if (pageNumber === undefined) {
-    const lsPageNumber = localStorage.getItem("current_page");
-    pageNumber = lsPageNumber ? parseInt(lsPageNumber) : 1;
-    const pageStats = calcPage();
-    const max = pageStats.pagination.pageMax;
-    if (pageNumber > max) {
-      pageNumber = max;
-    }
-  }
-  savePrefs({ currentPage: pageNumber });
-  itemRedirect(prefs.currentTask);
+  updatePrefs({ currentPage: pagination.currentPage });
+  pagination.page = pageNumber;
+  showPagination();
+  showLogs ();
 }
 
 function changePageSize (pageSize) {
-    savePrefs({ pageSize });
-    itemRedirect(prefs.currentTask);
+    updatePrefs({ pageSize, currentPage : 1 });
+    pagination.recalculate(pageSize);
+    showPagination();
+    showLogs ();
 }
 
 function saveData () {
     localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
 }
 
-function savePrefs (prefUpdateObj = {}) {
+function updatePrefs (prefUpdateObj = {}) {
     prefs = { ...prefs, ...prefUpdateObj };
     localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(prefs));
 }
 
 function itemRedirect (task) {
-    savePrefs ({ currentTask : task });
+    updatePrefs ({ currentTask : task });
     window.location.reload();
 }
 
