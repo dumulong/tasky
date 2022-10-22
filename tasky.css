@@ -10,7 +10,11 @@
   box-sizing: border-box;
   font-size: 10px;
   --font-size: 1.4rem;
+  --gray-font: hsla(0, 0%, 32%);
+  --light-gray : hsl(0, 0%, 97%);
+  --dark-gray : hsl(0, 0%, 85%);
   --accent-color: hsl(216, 98%, 52%);
+  --attention-color : hsl(0, 97%, 30%);
 }
 
 body {
@@ -20,6 +24,7 @@ body {
   font-size: var(--font-size);
   max-width: 60rem;
   margin: auto;
+  margin-top: 3px;
   text-align: center;
 }
 
@@ -54,11 +59,11 @@ button {
   align-items: center;
   min-height: 20px;
   padding: 19px;
-  background-color: hsl(0, 0%, 96%);
+  background-color: var(--light-gray);
   border: 1px solid hsl(0, 0%, 89%);
-  border-radius: 4px;
-  -webkit-box-shadow: inset 0 1px 1px hsla(0, 0%, 0%, 0.05);
-  box-shadow: inset 0 1px 1px hsla(0, 0%, 0%, 0.05);
+  border-radius: 10px;
+  /*-webkit-box-shadow: inset 1px 1px 1px hsl(0, 0%, 95%);*/
+  box-shadow: inset 4px 4px 10px hsl(0, 0%, 92%), inset -4px -4px 10px hsl(0, 0%, 92%);
 }
 
 #tasksList {
@@ -69,12 +74,11 @@ button {
   font-weight: 600;
   font-size: 1.8rem;
   justify-content: center;
-  color: rgba(51, 51, 51, 0.5);
+  color: var(--gray-font)
 }
 
 #tasksList div {
-  padding: 0 10px;
-  padding: 0 0.8rem;
+  padding: 0 .8rem;
 }
 
 #tasks {
@@ -90,9 +94,11 @@ button {
 }
 
 .task-desc {
-  padding: 0 10px;
-  margin-top: 4px;
-  color: hsl(0, 45%, 45%);
+  padding: 4px 10px;
+  margin-top: 10px;
+  color: hsl(0, 45%, 35%);
+  font-size: 1.6rem;
+  font-weight: 600;
 }
 
 .task-split {
@@ -134,15 +140,18 @@ button {
   border-bottom: 1px solid rgb(232, 232, 232);
   width: 100%;
   padding: 0.5rem 0;
+  color: var(--gray-font);
 }
 
 .log-comment {
   white-space: pre;
-  color: hsla(0, 0%, 20%, 0.5);
+  color: hsl(0, 0%, 65%);
 }
 
 .log-empty {
-  color: hsl(0, 97%, 30%);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--attention-color);
 }
 
 .delta-last {
@@ -188,7 +197,7 @@ button {
 }
 
 .page-button.inactive {
-  background-color: #D8d8d8;
+  background-color: var(--dark-gray);
   cursor: pointer;
 }
 

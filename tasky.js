@@ -21,15 +21,16 @@ function loadPage () {
 
     readLocalStorage();
     redirectToDefaultTask ();
-    initPagination();
-
-    showTaskList();
-    addTasksClicks();
-    toggleTaskHelp();
 
     showCurrentTask();
 
+    showTaskList();
+    addTasksClicks();
+
+    toggleTaskData();
+
     if (prefs.currentTask !== unknownTask) {
+        initPagination();
         showLogs();
         showPagination();
     }
@@ -69,24 +70,6 @@ function readLocalStorage () {
 
 }
 
-function initPagination () {
-    const task = findCurrentTask();
-    pagination = new Pagination (prefs.pageSize, prefs.pageWindow);
-}
-
-function showTaskList () {
-    //Generate the links
-    const links = tasks.map(x => `<div class="task-link">${x}</div>`);
-
-    // Add a link for a new task button
-    links.push(`<div class="task-link add-task-symbol" data-modal="modal-task">${addTaskSymbol}</div>`);
-
-    //Add them to the list
-    const separatorTemplate = '<span class="task-split">|</span>'
-    const tasksListDiv = document.querySelector ("#tasksList")
-    tasksListDiv.innerHTML = links.join(separatorTemplate);
-}
-
 function redirectToDefaultTask () {
     // If we haven't selected a task yet, show me the first from the list
     if ((prefs.currentTask === unknownTask) && (tasks.length >= 1)) {
@@ -94,6 +77,10 @@ function redirectToDefaultTask () {
             itemRedirect(tasks[0]);
         };
     }
+}
+
+function initPagination () {
+    pagination = new Pagination (prefs.pageSize, prefs.pageWindow);
 }
 
 function showCurrentTask() {
@@ -112,15 +99,32 @@ function showCurrentTask() {
     document.querySelector("#selectDate").value = dayjs().format("MM/DD/YYYY");
 }
 
-function toggleTaskHelp () {
+function showTaskList () {
+    //Generate the links
+    const links = tasks.map(x => `<div class="task-link">${x}</div>`);
+
+    // Add a link for a new task button
+    links.push(`<div class="task-link add-task-symbol" data-modal="modal-task">${addTaskSymbol}</div>`);
+
+    //Add them to the list
+    const separatorTemplate = '<span class="task-split">|</span>'
+    const tasksListDiv = document.querySelector ("#tasksList")
+    tasksListDiv.innerHTML = links.join(separatorTemplate);
+}
+
+function toggleTaskData () {
     if (prefs.currentTask === unknownTask) {
         document.querySelector(".add-task-help").classList.remove("hidden");
         document.querySelector(".add-date-div").classList.add("hidden");
+        document.querySelector(".task-data").classList.add("hidden");
     } else {
         document.querySelector(".add-task-help").classList.add("hidden");
         document.querySelector(".add-date-div").classList.remove("hidden");
+        document.querySelector(".task-data").classList.remove("hidden");
     }
 }
+
+// Logs
 
 function showLogs(){
     const task = findCurrentTask();
@@ -150,31 +154,9 @@ function showLogs(){
     } else {
         if (prefs.currentTask !== unknownTask) {
             const logs = document.querySelector (".logs");
-            logs.innerHTML = `<div class="log log-empty">Entries not found, click "Add"</div>`;
+            logs.innerHTML = `<div class="log log-empty">No entries found, click "Add"</div>`;
         }
     }
-}
-
-function calcDeltaDate (dateStamp) {
-    var today = dayjs();
-    var completedDate = dayjs(dateStamp);
-
-    var years = today.diff(completedDate, 'year');
-    completedDate = completedDate.add(years, 'years');
-
-    var months = today.diff(completedDate, 'months');
-    completedDate = completedDate.add(months, 'months');
-
-    var days = today.diff(completedDate, 'days');
-
-    let diff = (years ? `${Math.abs(years)} year${years === 1 ? "" : "s"} ` : "");
-    diff += (months ? `${Math.abs(months)} month${months === 1 ? "" : "s"} ` : "");
-    diff += (days ? `${Math.abs(days)} day${days === 1 ? "" : "s"}` : "");
-
-    const prefix = (today < completedDate ? "In " : "");
-    const suffix = (today < completedDate ? "" : " ago");
-
-    return (diff ? `${prefix}${diff}${suffix}` : "Today");
 }
 
 function addLogDate () {
@@ -240,6 +222,8 @@ function refreshLogClick () {
     trigger.addEventListener('click', openModal);
   });
 }
+
+// Tasks
 
 function addTask () {
     const taskInput = document.querySelector("[name=newTaskName]");
@@ -386,7 +370,22 @@ function setLSData() {
     }
 }
 
-// Helper function
+function copyLSData() {
+    // Get the text field
+    const lsDataTextarea = document.querySelector("#lsData");
+
+    // Select the text field
+    lsDataTextarea.select();
+    lsDataTextarea.setSelectionRange(0, 99999); // For mobile devices
+
+     // Copy the text inside the text field
+    navigator.clipboard.writeText(lsDataTextarea.value);
+
+    // Alert the copied text
+    alert("Copied to Clipboard!");
+}
+
+// Pagination
 
 class Pagination {
 
@@ -544,6 +543,30 @@ function changePageSize (pageSize) {
     showLogs ();
 }
 
+// Helper function
+
+function calcDeltaDate (dateStamp) {
+    var today = dayjs();
+    var completedDate = dayjs(dateStamp);
+
+    var years = today.diff(completedDate, 'year');
+    completedDate = completedDate.add(years, 'years');
+
+    var months = today.diff(completedDate, 'months');
+    completedDate = completedDate.add(months, 'months');
+
+    var days = today.diff(completedDate, 'days');
+
+    let diff = (years ? `${Math.abs(years)} year${years === 1 ? "" : "s"} ` : "");
+    diff += (months ? `${Math.abs(months)} month${months === 1 ? "" : "s"} ` : "");
+    diff += (days ? `${Math.abs(days)} day${days === 1 ? "" : "s"}` : "");
+
+    const prefix = (today < completedDate ? "In " : "");
+    const suffix = (today < completedDate ? "" : " ago");
+
+    return (diff ? `${prefix}${diff}${suffix}` : "Today");
+}
+
 function saveData () {
     localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
 }
@@ -562,22 +585,8 @@ function findCurrentTask () {
     return data.find (x => x.task === prefs.currentTask);
 }
 
-function copyLSData() {
-    // Get the text field
-    const lsDataTextarea = document.querySelector("#lsData");
-
-    // Select the text field
-    lsDataTextarea.select();
-    lsDataTextarea.setSelectionRange(0, 99999); // For mobile devices
-
-     // Copy the text inside the text field
-    navigator.clipboard.writeText(lsDataTextarea.value);
-
-    // Alert the copied text
-    alert("Copied to Clipboard!");
-  }
-
 // Helper function: given an object o, replace {var} with value of property o.var for any string
+
 String.prototype.supplant = function (o) {
     return this.replace(
         /{([^{}]*)}/g,

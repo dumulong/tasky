@@ -31,7 +31,10 @@ So, here it is, a full html/css/javascript solution. I did have to use a very sm
 ```json
 // local storage key: "Tasky_preferences"
 {
-    "currentTask" : "Dog Meds"
+    currentTask : unknownTask,
+    currentPage : 1,
+    pageSize : 10,
+    pageWindow : 5
 }
 ```
 
