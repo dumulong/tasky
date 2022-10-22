@@ -26,7 +26,10 @@
 <body>
 
 <header class="well">
-    <div id="task" data-modal="modal-task"></div>
+    <div id="task">
+        <div class="task-title"></div>
+        <i data-value="{logDate}" class="icon edit-task-icon" data-modal="modal-task">&#9998;</i>
+    </div>
     <time class="delta-last"></time>
     <nav id="tasksList"></nav>
     <div class="add-task-help hidden">
@@ -66,7 +69,7 @@
     <div class="log">
         <div class="log-date">
             {logDateLabel}
-            <i data-value="{logDate}" class="icon edit-icon" data-modal="modal-edit-log">&#9998;</i>
+            <i data-value="{logDate}" class="icon edit-log-icon" data-modal="modal-edit-log">&#9998;</i>
         </div>
         <div class="log-comment">{comment}</div>
     </div>
