@@ -18,23 +18,16 @@ let tasks = []; // List of tasks
 let pagination;
 
 function loadPage () {
-
     readLocalStorage();
     redirectToDefaultTask ();
-
     showCurrentTask();
-
     showTaskList();
-    addTasksClicks();
-
     toggleTaskData();
-
     if (prefs.currentTask !== unknownTask) {
         initPagination();
         showLogs();
         showPagination();
     }
-
     addModalClick();
 }
 
@@ -46,7 +39,6 @@ function readLocalStorage () {
     if (taskyLS) {
         // Extract the data and the task list from the localStorage
         data = JSON.parse(taskyLS)
-        data.forEach(item => tasks.push(item.task));
     }
 
     if (TaskyPrefLS) {
@@ -57,16 +49,6 @@ function readLocalStorage () {
             console.log(`%cERROR: %cInvalid preferences.`, "color:red;font-weight:800", "");
         }
     }
-
-    // Add a task to the list if it's not there yet (new task)
-    if (prefs.currentTask !== unknownTask) {
-        if (prefs.currentTask && !tasks.includes(prefs.currentTask)) {
-            tasks.push(prefs.currentTask);
-        }
-    }
-
-    //Finally, sort the task list
-    tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
 }
 
@@ -85,7 +67,7 @@ function initPagination () {
 
 function showCurrentTask() {
     // Show the current task
-    const taskTitle = document.querySelector ("#task");
+    const taskTitle = document.querySelector (".task-title");
     taskTitle.innerHTML = prefs.currentTask;
 
     // Any description?
@@ -101,6 +83,8 @@ function showCurrentTask() {
 
 function showTaskList () {
     //Generate the links
+    tasks = getTaskList (data);
+
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
 
     // Add a link for a new task button
@@ -110,6 +94,9 @@ function showTaskList () {
     const separatorTemplate = '<span class="task-split">|</span>'
     const tasksListDiv = document.querySelector ("#tasksList")
     tasksListDiv.innerHTML = links.join(separatorTemplate);
+
+    // Add the clicks event for each task
+    addTasksClicks();
 }
 
 function toggleTaskData () {
@@ -238,8 +225,10 @@ function updateTask () {
     if (task) {
         task.task = taskInput.value;
         task.description = taskDescInput.value;
-        showCurrentTask();
+        updatePrefs ({ currentTask : taskInput.value})
         saveData ();
+        showCurrentTask();
+        showTaskList ();
     }
     closeAllModal();
 }
@@ -357,6 +346,15 @@ function closeAllModal () {
 }
 
 // Local storage
+
+function saveData () {
+    localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
+}
+
+function updatePrefs (prefUpdateObj = {}) {
+    prefs = { ...prefs, ...prefUpdateObj };
+    localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(prefs));
+}
 
 function setLSData() {
     const lsDataTextarea = document.querySelector("#lsData");
@@ -567,13 +565,23 @@ function calcDeltaDate (dateStamp) {
     return (diff ? `${prefix}${diff}${suffix}` : "Today");
 }
 
-function saveData () {
-    localStorage.setItem(LocalStorageKey.data, JSON.stringify(data));
-}
+function getTaskList (dataArr) {
 
-function updatePrefs (prefUpdateObj = {}) {
-    prefs = { ...prefs, ...prefUpdateObj };
-    localStorage.setItem(LocalStorageKey.prefs, JSON.stringify(prefs));
+    const taskList = [];
+
+    dataArr.forEach(item => taskList.push(item.task));
+
+    // Add a task to the list if it's not there yet (new task)
+    if (prefs.currentTask !== unknownTask) {
+        if (prefs.currentTask && !taskList.includes(prefs.currentTask)) {
+            taskList.push(prefs.currentTask);
+        }
+    }
+
+    //Finally, sort the task list
+    taskList.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+    return taskList;
 }
 
 function itemRedirect (task) {
