@@ -63,9 +63,25 @@
     <a id="openLSData" data-modal="modal-local-storage">Show/Set Local Storage</a>
 </footer>
 
+<div id="test"></div>
 
-<!-- Log template -->
-<script id="log-template" type="text/template">
+<!-- Templates -->
+
+<template id="task-link">
+    <div class="task-link">{task}</div>
+</template>
+
+<template id="task-link-add">
+    <div class="task-link add-task-symbol" data-modal="modal-task">
+        {addTaskSymbol}
+    </div>
+</template>
+
+<template id="task-separator">
+    <span class="task-split">|</span>
+</template>
+
+<template id="log-template">
     <div class="log">
         <div class="log-date">
             {logDateLabel}
@@ -73,7 +89,13 @@
         </div>
         <div class="log-comment">{comment}</div>
     </div>
-</script>
+</template>
+
+<template id="log-empty">
+    <div class="log log-empty">No entries found. Click "Add" to add a new entry</div>
+</template>
+
+<!-- Modals -->
 
 <!-- Local Storage Dialog -->
 <div class="modal" id="modal-local-storage" data-pre-load-fnc="fillLSData">

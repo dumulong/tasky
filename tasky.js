@@ -16,11 +16,16 @@ let prefs = {
 let data = []; // The local storage data
 let tasks = []; // List of tasks
 let pagination;
+let templates;
 
 function loadPage () {
+
+    templates = new TemplateList()
+
     readLocalStorage();
     extractTaskList();
     redirectToDefaultTask ();
+    getSupplantTemplates();
     showCurrentTask();
     showTaskList();
     toggleTaskData();
@@ -86,15 +91,14 @@ function showCurrentTask() {
 
 function showTaskList () {
 
-    const links = tasks.map(x => `<div class="task-link">${x}</div>`);
+    const links = tasks.map(task => templates.get("task-link", { task }));
 
     // Add a link for a new task button
-    links.push(`<div class="task-link add-task-symbol" data-modal="modal-task">${addTaskSymbol}</div>`);
+    links.push(templates.get("task-link-add", { addTaskSymbol }));
 
     //Add them to the list
-    const separatorTemplate = '<span class="task-split">|</span>'
     const tasksListDiv = document.querySelector ("#tasksList")
-    tasksListDiv.innerHTML = links.join(separatorTemplate);
+    tasksListDiv.innerHTML = links.join(templates.get("task-separator"));
 
     // Add the clicks event for each task
     addTasksClicks();
@@ -137,7 +141,7 @@ function showLogs(){
             return logTemplate.supplant({logDate: x, logDateLabel, comment});
         })
         if (dateList.length === 0) {
-            dateList.push(`<div class="log log-empty">No entries found. Click "Add" to add a new entry</div>`);
+            dateList.push(templates.get("log-empty"));
         }
         document.querySelector (".logs").innerHTML = dateList.join("");
         refreshLogClick();
@@ -252,7 +256,7 @@ function addTasksClicks () {
     // Get all the links and add events to them
     const links = document.querySelectorAll(".task-link");
     for (var i = 0; i < links.length; i++) {
-        if (links[i].innerHTML !== addTaskSymbol){
+        if (!links[i].innerHTML.includes(addTaskSymbol)) {
             links[i].addEventListener("click", event =>  {
                 itemRedirect(event.target.innerHTML)
             });
@@ -608,6 +612,42 @@ function itemRedirect (task) {
 
 function findCurrentTask () {
     return data.find (x => x.task === prefs.currentTask);
+}
+
+function getSupplantTemplates () {
+    const templateNodeList = document.getElementsByTagName("template");
+    for (const template of templateNodeList) {
+        templates.add(template.id, fragmentToString(template));
+    };
+}
+
+function fragmentToString (fragment) {
+    return document.createElement("div").appendChild(fragment.cloneNode(true)).innerHTML;
+}
+
+class TemplateList {
+
+    constructor () {
+        this.list = [];
+    }
+
+    add (name, value) {
+        const template = { name, value };
+        this.list.push(template);
+    }
+
+    get (name, obj = {}) {
+        const template = this.list.find(x => x.name === name);
+        if (template) {
+             return template.value.replace(
+                /{([^{}]*)}/g,
+                function (a, b) {
+                    var r = obj[b];
+                    return typeof r === 'string' || typeof r === 'number' ? r : a;
+                }
+            );
+        }
+    }
 }
 
 // Helper function: given an object o, replace {var} with value of property o.var for any string
