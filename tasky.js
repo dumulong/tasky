@@ -19,6 +19,7 @@ let pagination;
 
 function loadPage () {
     readLocalStorage();
+    extractTaskList();
     redirectToDefaultTask ();
     showCurrentTask();
     showTaskList();
@@ -36,17 +37,18 @@ function readLocalStorage () {
     const TaskyPrefLS = localStorage.getItem(LocalStorageKey.prefs);
     const taskyLS = localStorage.getItem(LocalStorageKey.data);
 
-    if (taskyLS) {
-        // Extract the data and the task list from the localStorage
-        data = JSON.parse(taskyLS)
-    }
-
     if (TaskyPrefLS) {
-        // Extract the preferences from the localStorage
         try {
             prefs = { ...prefs, ...JSON.parse(TaskyPrefLS) };
         } catch (error) {
-            console.log(`%cERROR: %cInvalid preferences.`, "color:red;font-weight:800", "");
+            console.log(`%cERROR: %cInvalid preferences for localStorage '${LocalStorageKey.prefs}'.`, "color:red;font-weight:800", "");
+        }
+    }
+    if (taskyLS) {
+        try {
+            data = JSON.parse(taskyLS);
+        } catch (error) {
+            console.log(`%cERROR: %cInvalid data for localStorage '${LocalStorageKey.data}'.`, "color:red;font-weight:800", "");
         }
     }
 
@@ -82,8 +84,6 @@ function showCurrentTask() {
 }
 
 function showTaskList () {
-    //Generate the links
-    tasks = getTaskList (data);
 
     const links = tasks.map(x => `<div class="task-link">${x}</div>`);
 
@@ -135,14 +135,11 @@ function showLogs(){
             comment = (task[x] && task[x].comment ? task[x].comment : "");
             return logTemplate.supplant({logDate: x, logDateLabel, comment});
         })
+        if (dateList.length === 0) {
+            dateList.push(`<div class="log log-empty">No entries found. Click "Add" to add a new entry</div>`);
+        }
         document.querySelector (".logs").innerHTML = dateList.join("");
         refreshLogClick();
-
-    } else {
-        if (prefs.currentTask !== unknownTask) {
-            const logs = document.querySelector (".logs");
-            logs.innerHTML = `<div class="log log-empty">No entries found, click "Add"</div>`;
-        }
     }
 }
 
@@ -181,17 +178,13 @@ function saveLog () {
 }
 
 function deleteLog () {
-    const taskNdx = data.findIndex (x => x.task === prefs.currentTask);
-    const task = data[taskNdx];
 
     const editLogDate = document.querySelector('#editLogDate');
     const logDate = editLogDate.innerHTML;
 
-    if (task.values.length === 1) {
-        data.splice(taskNdx, 1);
-        saveData ();
-        itemRedirect("");
-    } else {
+    const task = findCurrentTask();
+
+    if (task) {
         const logEntry = dayjs(logDate).format("YYYYMMDD");
         task.values = task.values.filter(x => x !== logEntry);
         delete task[logEntry];
@@ -214,7 +207,21 @@ function refreshLogClick () {
 
 function addTask () {
     const taskInput = document.querySelector("[name=newTaskName]");
-    itemRedirect(taskInput.value);
+    const taskDescInput = document.querySelector("[name=taskDesc]");
+
+    const existingTask = data.find (x => x.task === taskInput.value);
+
+    if (!existingTask) {
+        const newTask = {
+            "task": taskInput.value,
+            "description" : taskDescInput.value,
+            "values" : []
+        }
+        data.push (newTask);
+        updatePrefs ({ currentTask : taskInput.value})
+        saveData ();
+        itemRedirect(taskInput.value);
+    }
 }
 
 function updateTask () {
@@ -227,10 +234,17 @@ function updateTask () {
         task.description = taskDescInput.value;
         updatePrefs ({ currentTask : taskInput.value})
         saveData ();
-        showCurrentTask();
-        showTaskList ();
+        itemRedirect(taskInput.value);
     }
-    closeAllModal();
+}
+
+function deleteTask () {
+    const taskNdx = data.findIndex (x => x.task === prefs.currentTask);
+    if (taskNdx !== -1) {
+        data.splice(taskNdx, 1);
+        saveData ();
+        itemRedirect(unknownTask);
+    }
 }
 
 function addTasksClicks () {
@@ -250,32 +264,35 @@ function addTasksClicks () {
 const modalFnc = {
     toggleTaskAddUpdate : (event) => {
         const trigger = event.target;
-        const taskInput = document.querySelector("[name=newTaskName]");
+
         const title = document.querySelector("#modal-task .modal-subtitle");
-        const descDiv = document.querySelector(".task-desc-input");
+
+        const taskInput = document.querySelector("[name=newTaskName]");
+        const descInput = document.querySelector("[name=taskDesc]");
+
         const btnUpdate = document.querySelector("#btnUpdateTask");
         const btnAdd = document.querySelector("#btnAddTask");
+        const btnDelete = document.querySelector("#btnDeleteTask");
 
         if (trigger.classList.contains("add-task-symbol")) {
             taskInput.value = "";
             title.innerHTML = "Add Task";
-            descDiv.classList.add("hidden");
-            btnUpdate.classList.add("hidden");
             btnAdd.classList.remove("hidden");
+            btnUpdate.classList.add("hidden");
+            btnDelete.classList.add("hidden");
         } else { // Update task
             const task = findCurrentTask();
             if (task) {
                 taskInput.value = task.task;
-                const descInput = document.querySelector("[name=taskDesc]");
                 descInput.value = task.description || "";
-                descDiv.classList.remove("hidden");
             } else {
                 taskInput.value = prefs.currentTask;
-                descDiv.classList.add("hidden");
+                descInput.value = "";
             }
             title.innerHTML = "Update Task";
-            btnUpdate.classList.remove("hidden");
             btnAdd.classList.add("hidden");
+            btnUpdate.classList.remove("hidden");
+            btnDelete.classList.remove("hidden");
         }
     },
     fillLogData : (event) => {
@@ -565,23 +582,22 @@ function calcDeltaDate (dateStamp) {
     return (diff ? `${prefix}${diff}${suffix}` : "Today");
 }
 
-function getTaskList (dataArr) {
+function extractTaskList () {
 
-    const taskList = [];
+    tasks = [];
 
-    dataArr.forEach(item => taskList.push(item.task));
+    data.forEach(item => tasks.push(item.task));
 
     // Add a task to the list if it's not there yet (new task)
     if (prefs.currentTask !== unknownTask) {
-        if (prefs.currentTask && !taskList.includes(prefs.currentTask)) {
-            taskList.push(prefs.currentTask);
+        if (prefs.currentTask && !tasks.includes(prefs.currentTask)) {
+            tasks.push(prefs.currentTask);
         }
     }
 
     //Finally, sort the task list
-    taskList.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-    return taskList;
 }
 
 function itemRedirect (task) {
