@@ -44,6 +44,7 @@ function readLocalStorage () {
             console.log(`%cERROR: %cInvalid preferences for localStorage '${LocalStorageKey.prefs}'.`, "color:red;font-weight:800", "");
         }
     }
+
     if (taskyLS) {
         try {
             data = JSON.parse(taskyLS);
@@ -597,7 +598,6 @@ function extractTaskList () {
 
     //Finally, sort the task list
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-
 }
 
 function itemRedirect (task) {
