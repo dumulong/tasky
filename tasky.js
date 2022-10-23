@@ -86,7 +86,7 @@ function showCurrentTask() {
 
 function showTaskList () {
 
-    const links = tasks.map(x => `<div class="task-link">${x}</div>`);
+    const links = tasks.map(task => `<div class="task-link">${task}</div>`);
 
     // Add a link for a new task button
     links.push(`<div class="task-link add-task-symbol" data-modal="modal-task">${addTaskSymbol}</div>`);
