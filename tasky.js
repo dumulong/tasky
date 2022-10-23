@@ -277,6 +277,7 @@ const modalFnc = {
 
         if (trigger.classList.contains("add-task-symbol")) {
             taskInput.value = "";
+            descInput.value = "";
             title.innerHTML = "Add Task";
             btnAdd.classList.remove("hidden");
             btnUpdate.classList.add("hidden");
