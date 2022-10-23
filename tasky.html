@@ -28,7 +28,7 @@
 <header class="well">
     <div id="task">
         <div class="task-title"></div>
-        <i data-value="{logDate}" class="icon edit-task-icon" data-modal="modal-task">&#9998;</i>
+        <i class="icon edit-task-icon" data-modal="modal-task">&#9998;</i>
     </div>
     <time class="delta-last"></time>
     <nav id="tasksList"></nav>
@@ -107,10 +107,14 @@
                 <textarea name="taskDesc" id="taskDesc"  cols="30" rows="4" value=""></textarea>
             </div>
             <div class="modal-button-group">
-                <button name="btnAddTask" id="btnAddTask" onclick="addTask ()">Add</button>
                 <button name="btnUpdateTask" id="btnUpdateTask" onclick="updateTask ()">Update</button>
+                <button name="btnDeleteTask" id="btnDeleteTask" onclick="deleteTask ()">Delete</button>
+            </div>
+            <div class="modal-button-group">
+                <button name="btnAddTask" id="btnAddTask" onclick="addTask ()">Add</button>
                 <button name="btnCancelTask" id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
             </div>
+
         </div>
     </div>
 </div>
