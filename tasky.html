@@ -26,23 +26,29 @@
 <body>
 
 <header class="well">
-    <div id="task">
+    <section id="task">
         <div class="task-title"></div>
         <i class="icon edit-task-icon" data-modal="modal-task">&#9998;</i>
-    </div>
+    </section>
     <time class="delta-last"></time>
     <nav id="tasksList"></nav>
-    <div class="add-task-help hidden">
+    <section class="add-task-help hidden">
         Please click on the plus sign to add a task.
-    </div>
-    <div class="add-date-div">
-        <input name="selectDate" id="selectDate" value="" />
-        <button name="btnAddLog" id="btnAddLog" onclick="addLogDate ()">Add</button>
-    </div>
+    </section>
+    <section class="select-date-div">
+        <button class="date-change-btn" onclick="changeDate (-7)">&lt;&lt;</button>
+        <button class="date-change-btn" onclick="changeDate (-1)">&lt;</button>
+        <input class="date-input" id="selectDate" value="" />
+        <button class="date-change-btn" onclick="changeDate (1)">&gt;</button>
+        <button class="date-change-btn" onclick="changeDate (7)">&gt;&gt;</button>
+    </section>
+    <section class="add-date-div">
+        <button onclick="addLogDate ()">Add</button>
+    </section>
 </header>
 
 <main class="task-data">
-    <div class="task-desc"></div>
+    <section class="task-desc"></section>
 
     <nav class="pagination pagination-top"></nav>
 
@@ -52,10 +58,10 @@
 
     <nav class="items-per-page">
         <div>Items per pages: </div>
-        <div class="page-size" data-page-size="10" onclick="changePageSize(10)">10</div>
-        <div class="page-size" data-page-size="25" onclick="changePageSize(25)">25</div>
-        <div class="page-size" data-page-size="50" onclick="changePageSize(50)">50</div>
-        <div class="page-size" data-page-size="100" onclick="changePageSize(100)">100</div>
+        <div class="page-size" onclick="changePageSize(10)">10</div>
+        <div class="page-size" onclick="changePageSize(25)">25</div>
+        <div class="page-size" onclick="changePageSize(50)">50</div>
+        <div class="page-size" onclick="changePageSize(100)">100</div>
     </nav>
 </main>
 
@@ -65,7 +71,7 @@
 
 
 <!-- Log template -->
-<script id="log-template" type="text/template">
+<template id="log-template">
     <div class="log">
         <div class="log-date">
             {logDateLabel}
@@ -73,7 +79,7 @@
         </div>
         <div class="log-comment">{comment}</div>
     </div>
-</script>
+</template>
 
 <!-- Local Storage Dialog -->
 <div class="modal" id="modal-local-storage" data-pre-load-fnc="fillLSData">
@@ -85,7 +91,7 @@
             <div class="modal-button-group">
                 <button onclick="copyLSData()">Copy</button>
             </div>
-            <textarea id="lsData" name="lsData" rows="10"></textarea>
+            <textarea id="lsData" rows="10"></textarea>
             <div class="modal-button-group">
                 <button id="btnSetLS" onclick="setLSData()">Set</button>
                 <button id="btnClose" onclick="closeAllModal()">Cancel</button>
@@ -101,18 +107,18 @@
         <button class="modal-close modal-exit">X</button>
         <div class="modal-subtitle">Add Task</div>
         <div>
-            <input name="newTaskName" id="newTaskName" value="" />
+            <input id="newTaskName" value="" />
             <div class="task-desc-input">
-                <div>Description</div>
-                <textarea name="taskDesc" id="taskDesc"  cols="30" rows="4" value=""></textarea>
+                <div>Description</div>9
+                <textarea id="taskDesc"  cols="30" rows="4" value=""></textarea>
             </div>
             <div class="modal-button-group">
-                <button name="btnUpdateTask" id="btnUpdateTask" onclick="updateTask ()">Update</button>
-                <button name="btnDeleteTask" id="btnDeleteTask" onclick="deleteTask ()">Delete</button>
+                <button id="btnUpdateTask" onclick="updateTask ()">Update</button>
+                <button id="btnDeleteTask" onclick="deleteTask ()">Delete</button>
             </div>
             <div class="modal-button-group">
-                <button name="btnAddTask" id="btnAddTask" onclick="addTask ()">Add</button>
-                <button name="btnCancelTask" id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
+                <button id="btnAddTask" onclick="addTask ()">Add</button>
+                <button id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
             </div>
 
         </div>
@@ -128,13 +134,13 @@
         <div id="editLogDate" class="modal-subtitle"></div>
         <div class="log-delta"></div>
         <div>
-            <textarea name="editLogComment" id="editLogComment" rows="4"></textarea>
+            <textarea id="editLogComment" rows="4"></textarea>
             <div class="modal-button-group">
-                <button name="btnSaveLog" id="btnSaveLog" onclick="saveLog ()">Save</button>
-                <button name="btnDeleteLog" id="btnDeleteLog" onclick="deleteLog ()">Delete</button>
+                <button id="btnSaveLog" onclick="saveLog ()">Save</button>
+                <button id="btnDeleteLog" onclick="deleteLog ()">Delete</button>
             </div>
             <div class="modal-button-group">
-                <button name="btnCancelTask" id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
+                <button id="btnCancelTask" onclick="closeAllModal ()">Cancel</button>
             </div>
         </div>
     </div>

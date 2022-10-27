@@ -168,7 +168,7 @@ function saveLog () {
     const logDate = editLogDate.innerHTML;
 
     const logEntry = dayjs(logDate).format("YYYYMMDD");
-    const editLogComment = document.querySelector('[name="editLogComment"]');
+    const editLogComment = document.querySelector('#editLogComment');
     if (!task[logEntry]) {
         task[logEntry] = {};
     }
@@ -207,8 +207,8 @@ function refreshLogClick () {
 // Tasks
 
 function addTask () {
-    const taskInput = document.querySelector("[name=newTaskName]");
-    const taskDescInput = document.querySelector("[name=taskDesc]");
+    const taskInput = document.querySelector("#newTaskName");
+    const taskDescInput = document.querySelector("#taskDesc");
 
     const existingTask = data.find (x => x.task === taskInput.value);
 
@@ -226,8 +226,8 @@ function addTask () {
 }
 
 function updateTask () {
-    const taskInput = document.querySelector("[name=newTaskName]");
-    const taskDescInput = document.querySelector("[name=taskDesc]");
+    const taskInput = document.querySelector("#newTaskName");
+    const taskDescInput = document.querySelector("#taskDesc");
     const task = findCurrentTask();
 
     if (task) {
@@ -268,8 +268,8 @@ const modalFnc = {
 
         const title = document.querySelector("#modal-task .modal-subtitle");
 
-        const taskInput = document.querySelector("[name=newTaskName]");
-        const descInput = document.querySelector("[name=taskDesc]");
+        const taskInput = document.querySelector("#newTaskName");
+        const descInput = document.querySelector("#taskDesc");
 
         const btnUpdate = document.querySelector("#btnUpdateTask");
         const btnAdd = document.querySelector("#btnAddTask");
@@ -312,7 +312,7 @@ const modalFnc = {
         const delta = dayjs(logDate);
         logDelta.innerHTML = `${calcDeltaDate(delta)}`;
 
-        const editLogComment = document.querySelector('[name="editLogComment"]');
+        const editLogComment = document.querySelector('#editLogComment');
         const logDateData = task[logDate];
         if (logDateData && logDateData.comment) {
             editLogComment.value = logDateData.comment;
@@ -324,8 +324,7 @@ const modalFnc = {
         const lsDataTextarea = document.querySelector("#lsData");
         lsDataTextarea.classList.remove("invalid"); // Just in case...
 
-        const lsData = document.querySelector('[name="lsData"]');
-        lsData.value = localStorage.getItem(LocalStorageKey.data);
+        lsDataTextarea.value = localStorage.getItem(LocalStorageKey.data);
     }
 }
 
@@ -599,6 +598,12 @@ function extractTaskList () {
 
     //Finally, sort the task list
     tasks.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+}
+
+function changeDate (nDays) {
+    const dateDiv = document.querySelector("#selectDate");
+    const selDate = dayjs(dateDiv.value);
+    dateDiv.value = selDate.add(nDays, 'day').format("MM/DD/YYYY");
 }
 
 function itemRedirect (task) {
