@@ -73,6 +73,9 @@ function showCurrentTask() {
     const taskTitle = document.querySelector (".task-title");
     taskTitle.innerHTML = prefs.currentTask;
 
+    const taskEditIcon = document.querySelector (".edit-task-icon");
+    taskEditIcon.classList.toggle("hidden", prefs.currentTask === unknownTask);
+
     // Any description?
     const currentTask = findCurrentTask();
     if (currentTask) {
@@ -333,7 +336,7 @@ function addModalClick () {
     const modals = document.querySelectorAll('[data-modal]');
 
     modals.forEach(trigger => {
-      trigger.addEventListener('click', openModal);
+        trigger.addEventListener('click', openModal);
     });
 }
 
