@@ -157,6 +157,7 @@ button {
 .log-comment {
   white-space: pre-wrap;
   color: hsl(0, 0%, 65%);
+  padding: 0 1rem;
 }
 
 .log-empty {
