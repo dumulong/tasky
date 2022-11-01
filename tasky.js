@@ -120,8 +120,8 @@ function toggleTaskData () {
 function showLogs(){
     const task = findCurrentTask();
     if (task) {
-        pagination.itemCount = (task ? task.values.length: 0);
-        pagination.page = prefs.currentPage;
+        pagination.setItemCount (task ? task.values.length: 0);
+        pagination.setPage (prefs.currentPage);
         const logTemplate = document.querySelector ("#log-template").innerHTML;
         const dates = task.values.sort().reverse();
 
@@ -429,13 +429,13 @@ class Pagination {
 
     }
 
-    set itemCount (totalItemCount) {
+    setItemCount (totalItemCount) {
         this.totalItemCount = totalItemCount;
         this.maxPageNumber = Math.max(Math.ceil(totalItemCount / this.itemPerPage), 1);
-        this.page = this.currentPage;
+        this.setPage (this.currentPage);
     }
 
-    set page (pageNo) {
+    setPage (pageNo) {
         if (pageNo == 0) {
             this.currentPage = 1;
         } else if (pageNo > this.maxPageNumber) {
@@ -552,7 +552,7 @@ function showPagination() {
 
 function gotoPage(pageNumber) {
   updatePrefs({ currentPage: pageNumber });
-  pagination.page = pageNumber;
+  pagination.setPage (pageNumber);
   showPagination();
   showLogs ();
 }
