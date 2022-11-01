@@ -415,12 +415,13 @@ class Pagination {
         this.windowPageAmount = windowPageAmount; // How many page number will be shown
 
         this.totalItemCount = 0;
-        this.maxPageNumber = 1;
+        this.maxPageNumber = 1; //The highest page number possible
 
         // Changes based on the current page
         this.currentPage = 1;
-        this.firstItem = 0
-        this.lastItem = 0;
+        this.firstItem = 0; // Index of the first element shown on the page
+        this.lastItem = 0; // Index of the last element shown on the page
+        this.showingCount = 0; // Item currently showing on the screen
         this.windowPageMin = 1; // Min value on the page number shown
         this.windowPageMax = 1; // Max value on the page number shown
         this.prev = false; // Can we go backward?
@@ -450,6 +451,7 @@ class Pagination {
         this.maxPageNumber = Math.max(Math.ceil(this.totalItemCount / this.itemPerPage), 1);
         this.firstItem = (this.currentPage - 1) * this.itemPerPage;
         this.lastItem = Math.min(Math.max(this.totalItemCount,1), this.currentPage * this.itemPerPage) - 1;
+        this.showingCount = (this.totalItemCount === 0 ? 0 : this.lastItem - this.firstItem + 1)
 
         // Now let's calculate the pagination window (for the page toolbar)
         const halfPageWindow = Math.floor(this.windowPageAmount / 2);
