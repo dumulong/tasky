@@ -431,7 +431,7 @@ class Pagination {
     set itemCount (totalItemCount) {
         this.totalItemCount = totalItemCount;
         this.maxPageNumber = Math.max(Math.ceil(totalItemCount / this.itemPerPage), 1);
-        this.page = prefs.currentPage;
+        this.page = this.currentPage;
     }
 
     set page (pageNo) {
@@ -616,6 +616,21 @@ function itemRedirect (task) {
 
 function findCurrentTask () {
     return data.find (x => x.task === prefs.currentTask);
+}
+
+function exportTask () {
+    let exportData =  `"Date","Log"\n`;
+    const task = findCurrentTask();
+    if (task) {
+        const dates = task.values.sort();
+        dates.map (x => {
+            logDateLabel = dayjs(x).format("MM/DD/YYYY");
+            comment = (task[x] && task[x].comment ? task[x].comment : "");
+            exportData += `"${logDateLabel}","${comment}"\n`;
+        })
+    } 
+    navigator.clipboard.writeText(exportData);
+    alert("Copied to Clipboard!");
 }
 
 // Helper function: given an object o, replace {var} with value of property o.var for any string
